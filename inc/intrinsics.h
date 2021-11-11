@@ -27,11 +27,14 @@ struct exception_frame {
 #define likely(x)     __builtin_expect(!!(x),1)
 #define unlikely(x)   __builtin_expect(!!(x),0)
 
+#define barrier() asm volatile ("" ::: "memory")
+#define cpu_relax() asm volatile ("nop" ::: "memory")
+
+#if defined(CORTEX_M3) || defined(CORTEX_M7)
+
 #define illegal() asm volatile (".short 0xde00");
 
-#define barrier() asm volatile ("" ::: "memory")
 #define cpu_sync() asm volatile("dsb; isb" ::: "memory")
-#define cpu_relax() asm volatile ("nop" ::: "memory")
 
 #define sv_call(imm) asm volatile ( "svc %0" : : "i" (imm) )
 
@@ -82,6 +85,13 @@ struct exception_frame {
 
 /* Cortex initialisation */
 void cortex_init(void);
+
+#elif defined(RISCV)
+
+#define IRQ_save(newpri) 0
+#define IRQ_restore(oldpri) ((void)oldpri)
+
+#endif
 
 #if defined(CORTEX_M7)
 

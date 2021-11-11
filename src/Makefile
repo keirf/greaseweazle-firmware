@@ -1,15 +1,15 @@
 OBJS += board.o
 OBJS += build_info.o
 OBJS += crc.o
-OBJS += vectors.o
+OBJS += $(arch)_vectors.o
 OBJS += main.o
 OBJS += string.o
-OBJS += cortex.o
+#OBJS += cortex.o
 OBJS += time.o
 OBJS += timer.o
 OBJS += util.o
-OBJS += floppy.o
-OBJS += testmode.o
+#OBJS += floppy.o
+#OBJS += testmode.o
 
 OBJS-$(debug) += console.o
 

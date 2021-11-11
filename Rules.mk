@@ -1,4 +1,5 @@
-TOOL_PREFIX = arm-none-eabi-
+TOOL_PREFIX = riscv32-unknown-elf-
+#arm-none-eabi-
 CC = $(TOOL_PREFIX)gcc
 OBJCOPY = $(TOOL_PREFIX)objcopy
 LD = $(TOOL_PREFIX)ld
@@ -15,18 +16,26 @@ FLAGS  = -g -Os -nostdlib -std=gnu99 -iquote $(ROOT)/inc
 FLAGS += -Wall -Werror -Wno-format -Wdeclaration-after-statement
 FLAGS += -Wstrict-prototypes -Wredundant-decls -Wnested-externs
 FLAGS += -fno-common -fno-exceptions -fno-strict-aliasing
-FLAGS += -mlittle-endian -mthumb -mfloat-abi=soft
+FLAGS += -mlittle-endian
+#-mthumb -mfloat-abi=soft
 FLAGS += -Wno-unused-value -ffunction-sections
 
 ifeq ($(mcu),stm32f1)
 FLAGS += -mcpu=cortex-m3 -DSTM32F1=1 -DMCU=1
 stm32f1=y
+arch=arm
 else ifeq ($(mcu),stm32f7)
 FLAGS += -mcpu=cortex-m7 -DSTM32F7=7 -DMCU=7
 stm32f7=y
+arch=arm
 else ifeq ($(mcu),at32f4)
 FLAGS += -mcpu=cortex-m4 -DAT32F4=4 -DMCU=4
 at32f4=y
+arch=arm
+else ifeq ($(mcu),gd32vf1)
+FLAGS += -march=rv32imac -DGD32VF1=2 -DMCU=2
+gd32vf1=y
+arch=rv32
 endif
 
 ifneq ($(debug),y)

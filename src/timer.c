@@ -27,6 +27,12 @@ void IRQ_50(void) __attribute__((alias("IRQ_timer")));
 #define tim tim5 /* 32-bit timer */
 #define tim_bits 32
 #define TIM_CR1_MCUBITS TIM_CR1_PMEN
+#elif MCU == GD32VF1
+void IRQ_50(void) __attribute__((alias("IRQ_timer")));
+#define TIMER_IRQ 50
+#define tim tim1
+#define tim_bits 16
+#define TIM_CR1_MCUBITS 0
 #endif
 
 /* IRQ only on counter overflow, one-time enable. */

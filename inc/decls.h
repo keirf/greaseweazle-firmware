@@ -27,6 +27,9 @@
 #elif MCU == AT32F4
 #include "mcu/at32/f4_regs.h"
 #include "mcu/at32/f4.h"
+#elif MCU == GD32VF1
+#include "mcu/gd32v/f1_regs.h"
+#include "mcu/gd32v/f1.h"
 #endif
 #include "intrinsics.h"
 

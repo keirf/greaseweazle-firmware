@@ -9,10 +9,15 @@
  * See the file COPYING for more details, or visit <http://unlicense.org>.
  */
 
+#if defined(CORTEX_M3) || defined(CORTEX_M7)
+#define FAST_ARM 1
+#endif
+
 void *memset(void *s, int c, size_t n)
 {
     char *p = s;
 
+#ifdef FAST_ARM
     /* Large aligned memset? */
     size_t n32 = n & ~31;
     if (n32 && !((uint32_t)p & 3)) {
@@ -20,6 +25,7 @@ void *memset(void *s, int c, size_t n)
         p += n32;
         n &= 31;
     }
+#endif
 
     /* Remainder/unaligned memset. */
     while (n--)
@@ -32,6 +38,7 @@ void *memcpy(void *dest, const void *src, size_t n)
     char *p = dest;
     const char *q = src;
 
+#ifdef FAST_ARM
     /* Large aligned copy? */
     size_t n32 = n & ~31;
     if (n32 && !(((uint32_t)p | (uint32_t)q) & 3)) {
@@ -40,6 +47,7 @@ void *memcpy(void *dest, const void *src, size_t n)
         q += n32;
         n &= 31;
     }
+#endif
 
     /* Remainder/unaligned copy. */
     while (n--)
@@ -47,6 +55,7 @@ void *memcpy(void *dest, const void *src, size_t n)
     return dest;
 }
 
+#ifdef FAST_ARM
 asm (
 ".global memcpy_fast, memset_fast\n"
 "memcpy_fast:\n"
@@ -75,6 +84,7 @@ asm (
 "    pop   {r4-r10}\n"
 "    bx    lr\n"
     );
+#endif
 
 void *memmove(void *dest, const void *src, size_t n)
 {
