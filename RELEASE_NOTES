@@ -1,7 +1,14 @@
 ************************************
-** Greaseweazle Release Notes
+** Greaseweazle Firmware Release Notes
 ** Keir Fraser <keir.xen@gmail.com>
 ************************************
+
+** v1.0 - 26 December 2021
+ - Firmware is now released separately from the host tools
+ - No firmware changes since v0.31 (apart from the version bump)
+
+-------------------------------------------------------------------------
+All versions below include firmware and host tools in a combined release.
 
 ** v0.33 - 14 December 2021
  - Support high-density Amiga images (1760kB ADF)
