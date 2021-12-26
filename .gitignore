@@ -7,14 +7,10 @@
 *.hex
 *.orig
 *.rej
-*.rld
 *.upd
 *.adf
 *.hfe
 *.ipf
 *.scp
 *.pyc
-scripts/greaseweazle/version.py
-scripts/greaseweazle/optimised/optimised*
-scripts/c_ext/build/
-Greaseweazle-*
+greaseweazle-firmware-*

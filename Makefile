@@ -14,23 +14,24 @@ $(TARGETS):
 
 else
 
-PROJ = Greaseweazle
+PROJ = greaseweazle-firmware
 VER := v$(FW_MAJOR).$(FW_MINOR)
 
 SUBDIRS += src bootloader blinky_test
 
 all:
-	$(MAKE) -C src -f $(ROOT)/Rules.mk $(PROJ).elf $(PROJ).bin $(PROJ).hex
+	$(MAKE) -C src -f $(ROOT)/Rules.mk \
+		greaseweazle.elf greaseweazle.bin greaseweazle.hex
 	$(MAKE) bootloader=y -C bootloader -f $(ROOT)/Rules.mk \
-		Bootloader.elf Bootloader.bin Bootloader.hex
-	srec_cat bootloader/Bootloader.hex -Intel src/$(PROJ).hex -Intel \
+		bootloader.elf bootloader.bin bootloader.hex
+	srec_cat bootloader/bootloader.hex -Intel src/greaseweazle.hex -Intel \
 	-o $(PROJ)-$(VER).hex -Intel
 	$(PYTHON) ./scripts/mk_update.py new $(PROJ)-$(VER).upd \
-		bootloader/Bootloader.bin src/$(PROJ).bin $(mcu)
+		bootloader/bootloader.bin src/greaseweazle.bin $(mcu)
 
 blinky:
 	$(MAKE) debug=y mcu=stm32f1 -C blinky_test -f $(ROOT)/Rules.mk \
-		Blinky.elf Blinky.bin Blinky.hex
+		blinky.elf blinky.bin blinky.hex
 
 clean::
 	rm -f *.hex *.upd
@@ -41,20 +42,20 @@ dist:
 	mkdir -p $(PROJ)-$(VER)/hex/alt
 	$(MAKE) clean
 	$(MAKE) mcu=stm32f1 all blinky
-	cp -a $(PROJ)-$(VER).hex $(PROJ)-$(VER)/hex/$(PROJ)-F1-$(VER).hex
+	cp -a $(PROJ)-$(VER).hex $(PROJ)-$(VER)/hex/$(PROJ)-f1-$(VER).hex
 	cp -a $(PROJ)-$(VER).upd $(PROJ)-$(VER)/$(PROJ)-$(VER).upd
-	cp -a blinky_test/Blinky.hex $(PROJ)-$(VER)/hex/alt/Blinky_Test-F1-$(VER).hex
+	cp -a blinky_test/blinky.hex $(PROJ)-$(VER)/hex/alt/blinky-test-f1-$(VER).hex
 	cp -a COPYING $(PROJ)-$(VER)/
 	cp -a README.md $(PROJ)-$(VER)/
 	cp -a RELEASE_NOTES $(PROJ)-$(VER)/
 	$(MAKE) clean
 	$(MAKE) mcu=stm32f7 all
-	cp -a $(PROJ)-$(VER).hex $(PROJ)-$(VER)/hex/$(PROJ)-F7-$(VER).hex
+	cp -a $(PROJ)-$(VER).hex $(PROJ)-$(VER)/hex/$(PROJ)-f7-$(VER).hex
 	$(PYTHON) ./scripts/mk_update.py cat $(PROJ)-$(VER)/$(PROJ)-$(VER).upd \
 		$(PROJ)-$(VER)/$(PROJ)-$(VER).upd $(PROJ)-$(VER).upd
 	$(MAKE) clean
 	$(MAKE) mcu=at32f4 all
-	cp -a $(PROJ)-$(VER).hex $(PROJ)-$(VER)/hex/$(PROJ)-AT32F4-$(VER).hex
+	cp -a $(PROJ)-$(VER).hex $(PROJ)-$(VER)/hex/$(PROJ)-at32f4-$(VER).hex
 	$(PYTHON) ./scripts/mk_update.py cat $(PROJ)-$(VER)/$(PROJ)-$(VER).upd \
 		$(PROJ)-$(VER)/$(PROJ)-$(VER).upd $(PROJ)-$(VER).upd
 	$(MAKE) clean
