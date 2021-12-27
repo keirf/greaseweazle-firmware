@@ -46,7 +46,7 @@ dist:
 	cp -a $(PROJ)-$(VER).upd $(PROJ)-$(VER)/$(PROJ)-$(VER).upd
 	cp -a blinky_test/blinky.hex $(PROJ)-$(VER)/hex/alt/blinky-test-f1-$(VER).hex
 	cp -a COPYING $(PROJ)-$(VER)/
-	cp -a README.md $(PROJ)-$(VER)/
+	cp -a README $(PROJ)-$(VER)/
 	cp -a RELEASE_NOTES $(PROJ)-$(VER)/
 	$(MAKE) clean
 	$(MAKE) mcu=stm32f7 all
