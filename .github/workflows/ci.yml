@@ -18,10 +18,10 @@ jobs:
     - name: Dependency packages (apt)
       run: |
         sudo apt update
-        sudo apt -y install git gcc-arm-none-eabi python3-pip srecord stm32flash zip
+        sudo apt -y install git gcc-arm-none-eabi python3-pip srecord zip
 
     - name: Dependency packages (pip)
-      run: python3 -m pip install --user bitarray crcmod pyserial
+      run: python3 -m pip install --user crcmod
 
     - name: Build dist
       run: |
