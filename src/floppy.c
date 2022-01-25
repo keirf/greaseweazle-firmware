@@ -236,18 +236,39 @@ static uint8_t drive_motor(uint8_t nr, bool_t on)
 
 }
 
-static uint8_t set_user_pin(unsigned int pin, unsigned int level)
+static const struct pin_mapping *find_user_pin(unsigned int pin)
 {
     const struct pin_mapping *upin;
 
     for (upin = board_config->user_pins; upin->pin_id != 0; upin++) {
         if (upin->pin_id == pin)
-            goto found;
+            return upin;
     }
-    return ACK_BAD_PIN;
 
-found:
+    return NULL;
+}
+
+static uint8_t set_user_pin(unsigned int pin, unsigned int level)
+{
+    const struct pin_mapping *upin;
+
+    upin = find_user_pin(pin);
+    if (upin == NULL)
+        return ACK_BAD_PIN;
+
     gpio_write_pin(gpio_from_id(upin->gpio_bank), upin->gpio_pin, level);
+    return ACK_OKAY;
+}
+
+static uint8_t get_user_pin(unsigned int pin, uint8_t *p_level)
+{
+    const struct pin_mapping *upin;
+
+    upin = find_user_pin(pin);
+    if (upin == NULL)
+        return ACK_BAD_PIN;
+
+    *p_level = gpio_read_pin(gpio_from_id(upin->gpio_bank), upin->gpio_pin);
     return ACK_OKAY;
 }
 
@@ -488,6 +509,8 @@ static uint8_t get_floppy_pin(unsigned int pin, uint8_t *p_level)
         break;
     default:
         rc = mcu_get_floppy_pin(pin, p_level);
+        if (rc == ACK_BAD_PIN)
+            rc = get_user_pin(pin, p_level);
         break;
     }
     return rc;
