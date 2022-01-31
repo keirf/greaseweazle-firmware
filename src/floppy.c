@@ -759,10 +759,11 @@ static void floppy_read(void)
             floppy_state = ST_read_flux_drain;
 
         } else if ((index.count == 0)
+                   && (read.max_index != INT_MAX)
                    && (time_since(flux_op.start) > time_ms(2000))) {
 
-            /* Timeout */
-            printk("NO INDEX\n");
+            /* Timeout if no index within two seconds, unless the read is
+             * not index terminated. */
             floppy_flux_end();
             flux_op.status = ACK_NO_INDEX;
             floppy_state = ST_read_flux_drain;
