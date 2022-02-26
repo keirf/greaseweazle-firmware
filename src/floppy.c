@@ -236,6 +236,44 @@ static uint8_t drive_motor(uint8_t nr, bool_t on)
 
 }
 
+static uint8_t drive_get_info(int nr, struct gw_drive_info *d)
+{
+    const struct unit *u;
+    uint32_t flags = 0;
+
+    if (nr < 0) {
+        if (unit_nr < 0)
+            return ACK_NO_UNIT;
+        nr = unit_nr;
+    }
+
+    switch (bus_type) {
+    case BUS_IBMPC:
+        if (nr >= 2)
+            return ACK_BAD_UNIT;
+        break;
+    case BUS_SHUGART:
+        if (nr >= 3)
+            return ACK_BAD_UNIT;
+        break;
+    default:
+        return ACK_NO_BUS;
+    }
+
+    u = &unit[unit_nr];
+    if (u->initialised)
+        flags |= m(_GW_DF_cyl_valid);
+    if (u->motor)
+        flags |= m(_GW_DF_motor_on);
+    if (u->is_flippy)
+        flags |= m(_GW_DF_is_flippy);
+
+    d->flags = flags;
+    d->cyl = u->cyl;
+
+    return ACK_OKAY;
+}
+
 static const struct pin_mapping *find_user_pin(unsigned int pin)
 {
     const struct pin_mapping *upin;
@@ -1414,6 +1452,16 @@ static void process_command(void)
             bw.max_bw.bytes = U_BUF_SZ;
             bw.max_bw.usecs = ss.min_delta / time_us(1);
             memcpy(&u_buf[2], &bw, sizeof(bw));
+            break;
+        }
+        case GETINFO_CURRENT_DRIVE:
+        case GETINFO_DRIVE(0) ... GETINFO_DRIVE(2): {
+            struct gw_drive_info d;
+            int unit_nr = cmd - GETINFO_DRIVE(0);
+            u_buf[1] = drive_get_info(unit_nr, &d);
+            if (u_buf[1] != ACK_OKAY)
+                goto out;
+            memcpy(&u_buf[2], &d, sizeof(d));
             break;
         }
         default:

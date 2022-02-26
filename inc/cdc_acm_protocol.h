@@ -171,6 +171,16 @@ struct packed gw_bw_stats {
     } min_bw, max_bw;
 };
 
+#define GETINFO_CURRENT_DRIVE 7
+#define GETINFO_DRIVE(unit)   (8+(unit))
+struct packed gw_drive_info {
+#define _GW_DF_cyl_valid 0
+#define _GW_DF_motor_on  1
+#define _GW_DF_is_flippy 2
+    uint32_t flags;
+    int32_t cyl;
+};
+
 /* CMD_READ_FLUX */
 struct packed gw_read_flux {
     /** MANDATORY FIELDS: **/
