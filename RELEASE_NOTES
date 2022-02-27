@@ -3,6 +3,15 @@
 ** Keir Fraser <keir.xen@gmail.com>
 ************************************
 
+** v1.1 - 27 February 2022
+ - V4: External Activity LED can be connected to pin TXO
+   - TXO-RXI jumper still forces update mode
+   - TXO still used for serial logging in debug firmware builds
+ - GetPin: Report on all pins also supported by SetPin
+ - ReadFlux: Don't report missing index if read is not index-terminated
+ - GetInfo: New sub-pages CurrentDrive and Drive_n
+   - Report motor, cylinder#, and flippy drive status
+
 ** v1.0 - 26 December 2021
  - Firmware is now released separately from the host tools
  - No firmware changes since v0.31 (apart from the version bump)
