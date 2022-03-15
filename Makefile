@@ -2,85 +2,80 @@
 export FW_MAJOR := 1
 export FW_MINOR := 1
 
-TARGETS := all blinky clean dist mrproper f1_ocd ocd flash start serial
-.PHONY: $(TARGETS)
-
-ifneq ($(RULES_MK),y)
-
-export ROOT := $(CURDIR)
-
-$(TARGETS):
-	$(MAKE) -f $(ROOT)/Rules.mk $@
-
-else
-
 PROJ = greaseweazle-firmware
 VER := v$(FW_MAJOR).$(FW_MINOR)
 
-SUBDIRS += src bootloader blinky_test
+PYTHON := python3
 
-all:
-	$(MAKE) -C src -f $(ROOT)/Rules.mk \
-		greaseweazle.elf greaseweazle.bin greaseweazle.hex
-	$(MAKE) bootloader=y -C bootloader -f $(ROOT)/Rules.mk \
-		bootloader.elf bootloader.bin bootloader.hex
-	srec_cat bootloader/bootloader.hex -Intel src/greaseweazle.hex -Intel \
-	-o $(PROJ)-$(VER).hex -Intel
-	$(PYTHON) ./scripts/mk_update.py new $(PROJ)-$(VER).upd \
-		bootloader/bootloader.bin src/greaseweazle.bin $(mcu)
+export ROOT := $(CURDIR)
 
-blinky:
-	$(MAKE) debug=y mcu=stm32f1 -C blinky_test -f $(ROOT)/Rules.mk \
-		blinky.elf blinky.bin blinky.hex
+.PHONY: FORCE
 
-clean::
-	rm -f *.hex *.upd
-	find . -name __pycache__ | xargs rm -rf
+.DEFAULT_GOAL := all
 
-dist:
-	rm -rf $(PROJ)-*
-	mkdir -p $(PROJ)-$(VER)/hex/alt
-	$(MAKE) clean
-	$(MAKE) mcu=stm32f1 all blinky
-	cp -a $(PROJ)-$(VER).hex $(PROJ)-$(VER)/hex/$(PROJ)-f1-$(VER).hex
-	cp -a $(PROJ)-$(VER).upd $(PROJ)-$(VER)/$(PROJ)-$(VER).upd
-	cp -a blinky_test/blinky.hex $(PROJ)-$(VER)/hex/alt/blinky-test-f1-$(VER).hex
-	cp -a COPYING $(PROJ)-$(VER)/
-	cp -a README $(PROJ)-$(VER)/
-	cp -a RELEASE_NOTES $(PROJ)-$(VER)/
-	$(MAKE) clean
-	$(MAKE) mcu=stm32f7 all
-	cp -a $(PROJ)-$(VER).hex $(PROJ)-$(VER)/hex/$(PROJ)-f7-$(VER).hex
-	$(PYTHON) ./scripts/mk_update.py cat $(PROJ)-$(VER)/$(PROJ)-$(VER).upd \
-		$(PROJ)-$(VER)/$(PROJ)-$(VER).upd $(PROJ)-$(VER).upd
-	$(MAKE) clean
-	$(MAKE) mcu=at32f4 all
-	cp -a $(PROJ)-$(VER).hex $(PROJ)-$(VER)/hex/$(PROJ)-at32f4-$(VER).hex
-	$(PYTHON) ./scripts/mk_update.py cat $(PROJ)-$(VER)/$(PROJ)-$(VER).upd \
-		$(PROJ)-$(VER)/$(PROJ)-$(VER).upd $(PROJ)-$(VER).upd
-	$(MAKE) clean
-	$(ZIP) $(PROJ)-$(VER).zip $(PROJ)-$(VER)
+prod-%: FORCE
+	$(MAKE) target mcu=$* target=bootloader level=prod
+	$(MAKE) target mcu=$* target=greaseweazle level=prod
 
-mrproper: clean
-	rm -rf $(PROJ)-*
+debug-%: FORCE
+	$(MAKE) target mcu=$* target=bootloader level=debug
+	$(MAKE) target mcu=$* target=greaseweazle level=debug
+
+all-%: FORCE prod-% debug-% ;
+
+all: FORCE all-stm32f1 all-stm32f7 all-at32f4 ;
+	$(MAKE) target mcu=stm32f1 target=blinky level=debug
+
+clean: FORCE
+	rm -rf out
+
+out: FORCE
+	mkdir -p out/$(mcu)/$(level)/$(target)
+	rsync -a --include="*/" --exclude="*" src/ out/$(mcu)/$(level)/$(target)
+
+target: FORCE out
+	$(MAKE) -C out/$(mcu)/$(level)/$(target) -f $(ROOT)/Rules.mk target.bin target.hex target.upd $(mcu)=y $(level)=y $(target)=y
+
+dist: level := prod
+dist: FORCE all
+	rm -rf out/$(PROJ)-*
+	$(eval t := out/$(PROJ)-$(VER))
+	mkdir -p out/$(PROJ)-$(VER)/hex/alt
+	$(eval s := out/stm32f1/$(level)/greaseweazle)
+	cp -a $(s)/target.hex $(t)/hex/$(PROJ)-f1-$(VER).hex
+	cp -a $(s)/target.upd $(t)/$(PROJ)-$(VER).upd
+	$(eval s := out/stm32f1/debug/blinky)
+	cp -a $(s)/target.hex $(t)/hex/alt/blinky-test-f1-$(VER).hex
+	$(eval s := out/stm32f7/$(level)/greaseweazle)
+	cp -a $(s)/target.hex $(t)/hex/$(PROJ)-f7-$(VER).hex
+	$(PYTHON) ./scripts/mk_update.py cat $(t)/$(PROJ)-$(VER).upd \
+		$(t)/$(PROJ)-$(VER).upd $(s)/target.upd
+	$(eval s := out/at32f4/$(level)/greaseweazle)
+	cp -a $(s)/target.hex $(t)/hex/$(PROJ)-at32f4-$(VER).hex
+	$(PYTHON) ./scripts/mk_update.py cat $(t)/$(PROJ)-$(VER).upd \
+		$(t)/$(PROJ)-$(VER).upd $(s)/target.upd
+	cp -a COPYING $(t)/
+	cp -a README $(t)/
+	cp -a RELEASE_NOTES $(t)/
+	(cd out && zip -r $(PROJ)-$(VER).zip $(PROJ)-$(VER))
 
 BAUD=115200
 DEV=/dev/ttyUSB0
+SUDO=sudo
+STM32FLASH=stm32flash
 
-ocd: all
+ocd: FORCE all
 	$(PYTHON) scripts/telnet.py localhost 4444 \
-	"reset init ; flash write_image erase `pwd`/$(PROJ)-$(VER).hex ; reset"
+	"reset init ; flash write_image erase `pwd`/$(target)/$(target).hex ; reset"
 
-f1_ocd: all
-	python3 scripts/openocd/flash.py `pwd`/$(PROJ)-$(VER).hex
+f1_ocd: FORCE all
+	$(PYTHON) scripts/openocd/flash.py `pwd`/$(target)/$(target).hex
 
-flash: all
-	sudo stm32flash -b $(BAUD) -w $(PROJ)-$(VER).hex $(DEV)
+flash: FORCE all
+	$(SUDO) $(STM32FLASH) -b $(BAUD) -w $(target)/$(target).hex $(DEV)
 
-start:
-	sudo stm32flash -b $(BAUD) -g 0 $(DEV)
+start: FORCE
+	$(SUDO) $(STM32FLASH) -b $(BAUD) -g 0 $(DEV)
 
-serial:
-	sudo miniterm.py $(DEV) 3000000
-
-endif
+serial: FORCE
+	$(SUDO) miniterm.py $(DEV) 3000000

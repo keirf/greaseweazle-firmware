@@ -32,8 +32,9 @@ class Version:
     def __init__(self, major, minor):
         self.major, self.minor = major, minor
 
-with open('Makefile', 'r') as f:
-    l = f.read()
+if sys.argv[1] == 'new':
+    with open('../../../../Makefile', 'r') as f:
+        l = f.read()
     major = int(re.search('FW_MAJOR := (\d+)', l).group(1))
     minor = int(re.search('FW_MINOR := (\d+)', l).group(1))
     version = Version(major, minor)

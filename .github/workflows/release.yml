@@ -27,7 +27,9 @@ jobs:
       run: python3 -m pip install --user crcmod
 
     - name: Build dist
-      run: make dist
+      run: |
+        make -j4 dist
+        mv out/*.zip .
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v2

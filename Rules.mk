@@ -46,9 +46,8 @@ CFLAGS += $(CFLAGS-y) $(FLAGS) -include decls.h
 AFLAGS += $(AFLAGS-y) $(FLAGS) -D__ASSEMBLY__
 LDFLAGS += $(LDFLAGS-y) $(FLAGS) -Wl,--gc-sections
 
-RULES_MK := y
-
-include Makefile
+SRCDIR := $(shell $(PYTHON) $(ROOT)/scripts/srcdir.py $(CURDIR))
+include $(SRCDIR)/Makefile
 
 SUBDIRS += $(SUBDIRS-y)
 OBJS += $(OBJS-y) $(patsubst %,%/build.o,$(SUBDIRS))
@@ -67,19 +66,11 @@ build.o: $(OBJS)
 %/build.o: FORCE
 	$(MAKE) -f $(ROOT)/Rules.mk -C $* build.o
 
-%.o: %.c Makefile
-	@echo CC $@
-	$(CC) $(CFLAGS) -c $< -o $@
-
-%.o: %.S Makefile
-	@echo AS $@
-	$(CC) $(AFLAGS) -c $< -o $@
-
-%.ld: %.ld.S Makefile
+%.ld: $(SRCDIR)/%.ld.S $(SRCDIR)/Makefile
 	@echo CPP $@
 	$(CC) -P -E $(AFLAGS) $< -o $@
 
-%.elf: $(OBJS) %.ld Makefile
+%.elf: $(OBJS) %.ld $(SRCDIR)/Makefile
 	@echo LD $@
 	$(CC) $(LDFLAGS) -T$(*F).ld $(OBJS) -o $@
 	chmod a-x $@
@@ -88,23 +79,25 @@ build.o: $(OBJS)
 	@echo OBJCOPY $@
 	$(OBJCOPY) -O ihex $< $@
 	chmod a-x $@
+ifneq ($(bootloader),y)
+	srec_cat ../bootloader/target.hex -Intel $@ -Intel -o $@ -Intel
+endif
 
 %.bin: %.elf
 	@echo OBJCOPY $@
 	$(OBJCOPY) -O binary $< $@
 	chmod a-x $@
 
-%.o: $(RPATH)/%.c Makefile
+%.upd: %.bin
+	$(PYTHON) $(ROOT)/scripts/mk_update.py new $@ \
+	../bootloader/target.bin $< $(mcu)
+
+%.o: $(SRCDIR)/%.c $(SRCDIR)/Makefile
 	@echo CC $@
 	$(CC) $(CFLAGS) -c $< -o $@
 
-%.o: $(RPATH)/%.S Makefile
+%.o: $(SRCDIR)/%.S $(SRCDIR)/Makefile
 	@echo AS $@
 	$(CC) $(AFLAGS) -c $< -o $@
-
-clean:: $(addprefix _clean_,$(SUBDIRS) $(SUBDIRS-n) $(SUBDIRS-))
-	rm -f *.orig *.rej *~ *.o *.elf *.hex *.bin *.ld $(DEPS)
-_clean_%: FORCE
-	$(MAKE) -f $(ROOT)/Rules.mk -C $* clean
 
 -include $(DEPS)
