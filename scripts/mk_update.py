@@ -1,4 +1,4 @@
-# mk_update.py new <output> <bootloader> <main_firmware> <stm_model>
+# mk_update.py new <output> <binary> "<stm_model>-<major>.<minor>-<type>"
 # mk_update.py cat <output> <update_file>*
 # mk_update.py verify <update_file>*
 #
@@ -28,17 +28,6 @@
 import crcmod.predefined
 import re, struct, sys
 
-class Version:
-    def __init__(self, major, minor):
-        self.major, self.minor = major, minor
-
-if sys.argv[1] == 'new':
-    with open('../../../../Makefile', 'r') as f:
-        l = f.read()
-    major = int(re.search('FW_MAJOR := (\d+)', l).group(1))
-    minor = int(re.search('FW_MINOR := (\d+)', l).group(1))
-    version = Version(major, minor)
-
 name_to_hw_model = { 'stm32f1': 1,
                      'stm32f7': 7,
                      'at32f4': 4 }
@@ -47,7 +36,7 @@ hw_model_to_name = { 1: 'STM32F1',
                      7: 'STM32F7',
                      4: 'AT32F4' }
 
-def mk_cat_entry(dat, hw_model, sig):
+def mk_cat_entry(dat, hw_model, major, minor, sig):
     max_kb = { 1: { b'BL':  8, b'GW': 56 },
                7: { b'BL': 16, b'GW': 48 },
                4: { b'BL': 16, b'GW': 48 } }
@@ -55,7 +44,7 @@ def mk_cat_entry(dat, hw_model, sig):
     assert (dlen & 3) == 0, "input is not longword padded"
     assert dlen <= max_kb[hw_model][sig]*1024, "input is too long"
     header = struct.pack("<2H", dlen + 8, hw_model)
-    footer = struct.pack("<2s2BH", sig, version.major, version.minor, hw_model)
+    footer = struct.pack("<2s2BH", sig, major, minor, hw_model)
     crc16 = crcmod.predefined.Crc('crc-ccitt-false')
     crc16.update(dat)
     crc16.update(footer)
@@ -64,11 +53,13 @@ def mk_cat_entry(dat, hw_model, sig):
 
 def new_upd(argv):
     dat = b'GWUP'
-    hw_model = name_to_hw_model[argv[2]]
-    with open(argv[1], "rb") as gw_f:
-        dat += mk_cat_entry(gw_f.read(), hw_model, b'GW')
-    with open(argv[0], "rb") as bl_f:
-        dat += mk_cat_entry(bl_f.read(), hw_model, b'BL')
+    m = re.match('([^-]+)-(\d+)\.(\d+)-(y?)', argv[1])
+    hw_model = name_to_hw_model[m.group(1)]
+    major, minor = int(m.group(2)), int(m.group(3))
+    is_bootloader = (m.group(4) == 'y')
+    sig = b'BL' if is_bootloader else b'GW'
+    with open(argv[0], "rb") as f:
+        dat += mk_cat_entry(f.read(), hw_model, major, minor, sig)
     return dat
 
 def cat_upd(argv):
@@ -111,7 +102,7 @@ def main(argv):
     if argv[1] == 'new':
         dat = new_upd(argv[3:])
     elif argv[1] == 'cat':
-        dat = cat_upd(argv[3:])
+        dat = cat_upd(argv[2:])
     elif argv[1] == 'verify':
         verify_upd(argv[2:])
         return

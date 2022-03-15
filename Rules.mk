@@ -90,7 +90,7 @@ endif
 
 %.upd: %.bin
 	$(PYTHON) $(ROOT)/scripts/mk_update.py new $@ \
-	../bootloader/target.bin $< $(mcu)
+	$< $(mcu)-$(FW_MAJOR).$(FW_MINOR)-$(bootloader)
 
 %.o: $(SRCDIR)/%.c $(SRCDIR)/Makefile
 	@echo CC $@

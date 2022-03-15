@@ -43,17 +43,19 @@ dist: FORCE all
 	mkdir -p $(t)/hex/alt
 	cd out/stm32f1/$(level)/greaseweazle; \
 	  cp -a target.hex $(t)/hex/$(PROJ)-f1-$(VER).hex; \
-	  cp -a target.upd $(t)/$(PROJ)-$(VER).upd
+	  cp -a ../bootloader/target.upd $(t)/$(PROJ)-$(VER).upd; \
+	  $(PYTHON) $(ROOT)/scripts/mk_update.py cat $(t)/$(PROJ)-$(VER).upd \
+	    target.upd
 	cd out/stm32f1/debug/blinky; \
 	  cp -a target.hex $(t)/hex/alt/blinky-test-f1-$(VER).hex
 	cd out/stm32f7/$(level)/greaseweazle; \
 	  cp -a target.hex $(t)/hex/$(PROJ)-f7-$(VER).hex; \
 	  $(PYTHON) $(ROOT)/scripts/mk_update.py cat $(t)/$(PROJ)-$(VER).upd \
-	    $(t)/$(PROJ)-$(VER).upd target.upd
+	    ../bootloader/target.upd target.upd
 	cd out/at32f4/$(level)/greaseweazle; \
 	  cp -a target.hex $(t)/hex/$(PROJ)-at32f4-$(VER).hex; \
 	  $(PYTHON) $(ROOT)/scripts/mk_update.py cat $(t)/$(PROJ)-$(VER).upd \
-	    $(t)/$(PROJ)-$(VER).upd target.upd
+	    ../bootloader/target.upd target.upd
 	cp -a COPYING $(t)/
 	cp -a README $(t)/
 	cp -a RELEASE_NOTES $(t)/
