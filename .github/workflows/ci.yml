@@ -29,8 +29,8 @@ jobs:
         export V=${{ steps.vars.outputs.sha_short }}
         make -j4 dist
         mkdir -p _cidist
-        rm out/$P-v*.zip
-        mv out/$P-v* $P-$V
+        rm out/$P-*.zip
+        mv out/$P-* $P-$V
         rm $P-$V/RELEASE_NOTES
         git rev-parse HEAD >$P-$V/COMMIT
         zip -r $P-$V.zip $P-$V
@@ -41,8 +41,8 @@ jobs:
         export P=greaseweazle-firmware
         export V=${{ steps.vars.outputs.sha_short }}-debug
         make -j4 dist level=debug
-        rm out/$P-v*.zip
-        mv out/$P-v* $P-$V
+        rm out/$P-*.zip
+        mv out/$P-* $P-$V
         rm $P-$V/RELEASE_NOTES
         git rev-parse HEAD >$P-$V/COMMIT
         echo debug >>$P-$V/COMMIT

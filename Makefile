@@ -3,7 +3,7 @@ export FW_MAJOR := 1
 export FW_MINOR := 1
 
 PROJ = greaseweazle-firmware
-VER := v$(FW_MAJOR).$(FW_MINOR)
+VER := $(FW_MAJOR).$(FW_MINOR)
 
 PYTHON := python3
 

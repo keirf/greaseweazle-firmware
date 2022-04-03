@@ -16,7 +16,7 @@ jobs:
     - name: Set environment variables
       id: vars
       run: |
-        echo "::set-output name=ref::$(echo ${{ github.ref }} | sed -e's#.*/##')"
+        echo "::set-output name=ver::$(echo ${{ github.ref }} | sed -e's#.*/v##')"
 
     - name: Dependency packages (apt)
       run: |
@@ -34,8 +34,8 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@v2
       with:
-        name: greaseweazle-firmware.ci.${{ steps.vars.outputs.ref }}
-        path: greaseweazle-firmware-${{ steps.vars.outputs.ref }}.zip
+        name: greaseweazle-firmware.ci.${{ steps.vars.outputs.ver }}
+        path: greaseweazle-firmware-${{ steps.vars.outputs.ver }}.zip
 
   finalise:
     needs: build-ubuntu
@@ -47,12 +47,12 @@ jobs:
     - name: Set environment variables
       id: vars
       run: |
-        echo "::set-output name=ref::$(echo ${{ github.ref }} | sed -e's#.*/##')"
+        echo "::set-output name=ver::$(echo ${{ github.ref }} | sed -e's#.*/v##')"
 
     - name: Download artifacts
       uses: actions/download-artifact@v2
       with:
-        name: greaseweazle-firmware.ci.${{ steps.vars.outputs.ref }}
+        name: greaseweazle-firmware.ci.${{ steps.vars.outputs.ver }}
 
     - name: Create Release
       id: create_release
@@ -61,7 +61,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ github.ref }}
-        release_name: Greaseweazle Firmware ${{ steps.vars.outputs.ref }}
+        release_name: Greaseweazle Firmware ${{ steps.vars.outputs.ver }}
         body: "[**Release Notes:**](https://github.com/keirf/greaseweazle-firmware/blob/master/RELEASE_NOTES)"
         draft: false
         prerelease: false
@@ -72,6 +72,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: greaseweazle-firmware-${{ steps.vars.outputs.ref }}.zip
-        asset_name: greaseweazle-firmware-${{ steps.vars.outputs.ref }}.zip
+        asset_path: greaseweazle-firmware-${{ steps.vars.outputs.ver }}.zip
+        asset_name: greaseweazle-firmware-${{ steps.vars.outputs.ver }}.zip
         asset_content_type: application/zip
