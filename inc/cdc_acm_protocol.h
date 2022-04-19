@@ -87,6 +87,7 @@
 #define BUS_NONE            0
 #define BUS_IBMPC           1
 #define BUS_SHUGART         2
+/*#define BUS_APPLE2        3*/ /* reserved for Adafruit_Floppy */
 
 
 /*
