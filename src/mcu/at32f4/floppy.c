@@ -63,6 +63,7 @@ static void floppy_mcu_init(void)
     for (U_BUF_SZ = 128; U_BUF_SZ > avail_kb; U_BUF_SZ >>= 1)
         continue;
     U_BUF_SZ <<= 10;
+    printk("avail: %d buf: %d\n", avail_kb, U_BUF_SZ);
 
     /* Map PA15 -> TIM2 Ch1. */
     afio->mapr = (AFIO_MAPR_SWJ_ON_JTAG_OFF

@@ -22,6 +22,7 @@ static void canary_check(void)
     ASSERT(_thread_stackbottom[0] == 0xdeadbeef);
 }
 
+void test_huffman(void);
 int main(void)
 {
     /* Relocate DATA. Initialise BSS. */
@@ -39,6 +40,8 @@ int main(void)
     printk("\n** Greaseweazle v%u.%u\n", fw_major, fw_minor);
     printk("** Keir Fraser <keir.xen@gmail.com>\n");
     printk("** https://github.com/keirf/Greaseweazle\n\n");
+
+    test_huffman();
 
     floppy_init();
     usb_init();

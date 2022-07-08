@@ -7,6 +7,7 @@ OBJS += cortex.o
 OBJS += time.o
 OBJS += timer.o
 OBJS += util.o
+OBJS += huffman.o
 OBJS-$(debug) += console.o
 
 ifeq ($(blinky),y)
