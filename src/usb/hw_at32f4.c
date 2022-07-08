@@ -18,6 +18,7 @@ void hw_usb_init(void)
     switch (at32f4_series) {
 
     case AT32F403:
+    case AT32F403A:
         drv = &usbd;
         break;
 

@@ -52,6 +52,7 @@ static void clock_init(void)
 
     switch (at32f4_series) {
     case AT32F403:
+    case AT32F403A:
         cfgr |= RCC_CFGR_PLLRANGE_GT72MHZ;
         early_delay_ms(2);
         break;
@@ -75,6 +76,7 @@ static void clock_init(void)
     case AT32F403:
         early_delay_us(200);
         break;
+    case AT32F403A:
     case AT32F415:
         *RCC_MISC2 |= RCC_MISC2_AUTOSTEP_EN;
         break;
@@ -89,6 +91,7 @@ static void clock_init(void)
     case AT32F403:
         early_delay_us(200);
         break;
+    case AT32F403A:
     case AT32F415:
         *RCC_MISC2 &= ~RCC_MISC2_AUTOSTEP_EN;
         break;
@@ -125,6 +128,7 @@ static void identify_mcu(void)
     at32f4_series = *(uint8_t *)0x1ffff7f3; /* UID[95:88] */
     switch (at32f4_series) {
     case AT32F403:
+    case AT32F403A:
         sram_kb = 96;
         break;
     case AT32F415:
