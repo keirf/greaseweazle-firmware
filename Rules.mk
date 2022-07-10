@@ -64,6 +64,7 @@ build.o: $(OBJS)
 	$(LD) -r -o $@ $^
 
 %/build.o: FORCE
+	+mkdir -p $*
 	$(MAKE) -f $(ROOT)/Rules.mk -C $* build.o
 
 %.ld: $(SRCDIR)/%.ld.S $(SRCDIR)/Makefile
