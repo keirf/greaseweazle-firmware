@@ -104,6 +104,7 @@ struct usb_driver {
 
 extern const struct usb_driver dwc_otg;
 extern const struct usb_driver usbd;
+extern const struct usb_driver usbd_at32f4;
 
 #define WARN printk
 

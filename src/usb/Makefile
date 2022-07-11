@@ -2,6 +2,9 @@ OBJS += config.o
 OBJS += core.o
 OBJS += cdc_acm.o
 
+ifneq ($(bootloader),y)
+OBJS-$(stm32f1) += hw_usbd_at32f4.o
+endif
 OBJS-$(stm32f1) += hw_usbd.o
 OBJS-$(stm32f1) += hw_f1.o
 

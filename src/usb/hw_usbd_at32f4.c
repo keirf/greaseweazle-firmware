@@ -515,7 +515,7 @@ static void IRQ_USB_HP(void)
     }
 }
 
-const struct usb_driver usbd = {
+const struct usb_driver usbd_at32f4 = {
     .init = usbd_init,
     .deinit = usbd_deinit,
     .process = usbd_process,

@@ -221,14 +221,6 @@ static void usbd_configure_ep(uint8_t ep, uint8_t type, uint32_t size)
 
 #else /* !defined(BOOTLOADER) */
 
-    if (type == EPT_DBLBUF) {
-        /* We detect an Artery MCU by presence of Cortex-M4 CPUID. Cortex-M4:
-         * 41xfc24x ; Cortex-M3: 41xfc23x */
-        bool_t is_artery_mcu = ((scb->cpuid >> 4) & 0xf) == 4;
-        if (is_artery_mcu)
-            type = EPT_BULK;
-    }
-
     dbl_buf = (type == EPT_DBLBUF);
     if (dbl_buf) {
         ASSERT(ep != 0);
