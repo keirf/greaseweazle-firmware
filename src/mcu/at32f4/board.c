@@ -131,9 +131,12 @@ void identify_board_config(void)
     if (id >= ARRAY_SIZE(_board_config))
         early_fatal(2);
 
-    /* Single static config. */
     gw_info.hw_submodel = id;
     board_config = &_board_config[id];
+
+    gw_info.mcu_id = at32f4_series;
+    gw_info.mcu_mhz = SYSCLK_MHZ;
+    gw_info.mcu_sram_kb = sram_kb;
 }
 
 static void mcu_board_init(void)

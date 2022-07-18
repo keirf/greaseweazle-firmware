@@ -160,6 +160,9 @@ struct packed gw_info {
     uint32_t sample_freq;
     uint8_t hw_model, hw_submodel;
     uint8_t usb_speed;
+    uint8_t mcu_id;
+    uint16_t mcu_mhz;
+    uint16_t mcu_sram_kb;
 };
 extern struct gw_info gw_info;
 
