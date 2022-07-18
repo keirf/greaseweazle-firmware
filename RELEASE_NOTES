@@ -3,6 +3,10 @@
 ** Keir Fraser <keir.xen@gmail.com>
 ************************************
 
+** v1.2 - 18 July 2022
+ - Support AT32F403A MCU on F1 and V4 boards
+ - Send MCU info to host (reported in 'gw info')
+
 ** v1.1 - 27 February 2022
  - V4: External Activity LED can be connected to pin TXO
    - TXO-RXI jumper still forces update mode
