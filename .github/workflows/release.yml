@@ -56,22 +56,13 @@ jobs:
 
     - name: Create Release
       id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: ncipollo/release-action@v1
       with:
-        tag_name: ${{ github.ref }}
-        release_name: Greaseweazle Firmware ${{ steps.vars.outputs.ver }}
+        tag: ${{ github.ref }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+        name: Greaseweazle Firmware ${{ steps.vars.outputs.ver }}
         body: "[**Release Notes:**](https://github.com/keirf/greaseweazle-firmware/blob/master/RELEASE_NOTES)"
         draft: false
         prerelease: false
-
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: greaseweazle-firmware-${{ steps.vars.outputs.ver }}.zip
-        asset_name: greaseweazle-firmware-${{ steps.vars.outputs.ver }}.zip
-        asset_content_type: application/zip
+        artifacts: greaseweazle-firmware-${{ steps.vars.outputs.ver }}.zip
+        artifactContentType: application/zip
