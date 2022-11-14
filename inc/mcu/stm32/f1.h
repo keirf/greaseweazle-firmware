@@ -54,7 +54,11 @@ static USART usart2 = (struct usart *)USART2_BASE;
 static USART usart3 = (struct usart *)USART3_BASE;
 static SER_ID ser_id = (uint32_t *)0x1ffff7e8;
 
-#define SYSCLK_MHZ 72
+#define SYSCLK_MHZ  72
+#define AHB_MHZ     72
+#define APB1_MHZ    36
+#define APB2_MHZ    72
+
 #define FLASH_PAGE_SIZE 1024
 
 /* No delay required after enabling a peripheral clock, before accessing it. */

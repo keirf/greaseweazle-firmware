@@ -69,9 +69,9 @@ void early_fatal(int blinks) __attribute__((noreturn));
 #define early_delay_us(us) (delay_ticks((us)*1))
 
 #define SYSCLK_MHZ 144
-#define AHB_MHZ (SYSCLK_MHZ / 1)  /* 144MHz */
-#define APB1_MHZ (SYSCLK_MHZ / 2) /* 72MHz */
-#define APB2_MHZ (SYSCLK_MHZ / 2) /* 72MHz */
+#define AHB_MHZ    144
+#define APB1_MHZ    72
+#define APB2_MHZ    72
 
 extern unsigned int FLASH_PAGE_SIZE;
 

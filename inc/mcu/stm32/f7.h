@@ -74,9 +74,9 @@ static HSPHYC hsphyc = (struct hsphyc *)HSPHYC_BASE;
 static SER_ID ser_id = (uint32_t *)0x1ff07a10;
 
 #define SYSCLK_MHZ 216
-#define AHB_MHZ (SYSCLK_MHZ / 1)  /* 216MHz */
-#define APB1_MHZ (SYSCLK_MHZ / 4) /* 54MHz */
-#define APB2_MHZ (SYSCLK_MHZ / 2) /* 108MHz */
+#define AHB_MHZ    216
+#define APB1_MHZ    54
+#define APB2_MHZ   108
 
 #define FLASH_PAGE_SIZE 16384
 
