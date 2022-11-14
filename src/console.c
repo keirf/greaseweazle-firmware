@@ -13,11 +13,7 @@
 #define BAUD 3000000 /* 3Mbaud */
 #endif
 
-#if MCU == STM32F1
-#define PCLK SYSCLK
-#else
 #define PCLK (APB2_MHZ * 1000000)
-#endif
 
 #define USART1_IRQ 37
 
