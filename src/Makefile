@@ -12,6 +12,7 @@ OBJS-$(debug) += console.o
 ifeq ($(blinky),y)
 
 OBJS += blinky.o
+console.o: CFLAGS += -DBAUD=115200
 
 else ifeq ($(bootloader),y)
 
