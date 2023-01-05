@@ -12,11 +12,13 @@
 #define CORTEX_M3 1
 
 /* C pointer types */
+#define ACC volatile struct acc * const
 #define BKP volatile struct bkp * const
 #define AFIO volatile struct afio * const
 #define DMA_CHN volatile struct dma_chn * const
 
 /* C-accessible registers. */
+static ACC acc = (struct acc *)ACC_BASE;
 static STK stk = (struct stk *)STK_BASE;
 static SCB scb = (struct scb *)SCB_BASE;
 static NVIC nvic = (struct nvic *)NVIC_BASE;
@@ -68,10 +70,12 @@ void early_fatal(int blinks) __attribute__((noreturn));
 #define early_delay_ms(ms) (delay_ticks((ms)*1000))
 #define early_delay_us(us) (delay_ticks((us)*1))
 
-#define SYSCLK_MHZ 144
-#define AHB_MHZ    144
-#define APB1_MHZ    72
-#define APB2_MHZ    72
+extern unsigned int sysclk_mhz;
+extern unsigned int apb_mhz;
+#define SYSCLK_MHZ sysclk_mhz
+#define AHB_MHZ    sysclk_mhz
+#define APB1_MHZ   apb_mhz
+#define APB2_MHZ   apb_mhz
 
 extern unsigned int FLASH_PAGE_SIZE;
 

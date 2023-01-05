@@ -9,6 +9,17 @@
  * See the file COPYING for more details, or visit <http://unlicense.org>.
  */
 
+#if defined(BOOTLOADER)
+/* Don't trust the USB HSI clock strategy for the bootloader yet. 
+ * Using HSE divided to 48MHz is simpler and it's proven to work well.  */
+#define FAST_AT32F403A FALSE
+#else
+#define FAST_AT32F403A TRUE
+#endif
+
+unsigned int sysclk_mhz = 144;
+unsigned int apb_mhz = 72;
+
 unsigned int FLASH_PAGE_SIZE = 2048;
 unsigned int at32f4_series;
 
@@ -17,7 +28,7 @@ unsigned int sram_kb;
 
 static void clock_init(void)
 {
-    uint32_t cfgr;
+    uint32_t cfgr, pllmul;
     int i;
 
     if (at32f4_series == AT32F415) {
@@ -40,12 +51,13 @@ static void clock_init(void)
     }
 
     /* PLLs, scalers, muxes. */
-    cfgr = (RCC_CFGR_PLLMUL_18 |        /* PLL = 18*8MHz = 144MHz */
-            RCC_CFGR_USBPSC_3 |         /* USB = 144/3MHz = 48MHz */
+    pllmul = (sysclk_mhz / 8) - 1; /* PLLMUL(SYSCLK/HSE) */
+    cfgr = (((pllmul & 0x30) << 25) | ((pllmul & 0x0f) << 18) |
+            RCC_CFGR_USBPSC_3 |         /* USB = SYSCLK/3 */
             RCC_CFGR_PLLSRC_PREDIV1 |
             RCC_CFGR_ADCPRE_DIV8 |
-            RCC_CFGR_APB2PSC_2 |        /* APB2 = 144/2MHz = 72MHz */
-            RCC_CFGR_APB1PSC_2);        /* APB1 = 144/2MHz = 72MHz */
+            RCC_CFGR_APB2PSC_2 |        /* APB2 = SYSCLK/2 */
+            RCC_CFGR_APB1PSC_2);        /* APB1 = SYSCLK/2 */
 
     if (board_config->hse_mhz == 16)
         cfgr |= RCC_CFGR_HSE_PREDIV2;
@@ -97,8 +109,15 @@ static void clock_init(void)
         break;
     }
 
-    /* Internal oscillator no longer needed. */
-    rcc->cr &= ~RCC_CR_HSION;
+    if ((at32f4_series == AT32F403A) && FAST_AT32F403A) {
+        /* Internal oscillator is used as the USB clock because we cannot
+         * derive 48MHz from the faster 216MHz PLL output. */
+        *RCC_MISC |= RCC_MISC_HSI_NODIV;
+        *RCC_MISC2 |= RCC_MISC2_HSI_FOR_USB;
+    } else {
+        /* Internal oscillator no longer needed. */
+        rcc->cr &= ~RCC_CR_HSION;
+    }
 }
 
 static void peripheral_init(void)
@@ -111,6 +130,16 @@ static void peripheral_init(void)
                     RCC_APB2ENR_IOPFEN |
                     RCC_APB2ENR_AFIOEN);
     rcc->ahbenr = RCC_AHBENR_DMA1EN;
+
+    if ((at32f4_series == AT32F403A) && FAST_AT32F403A) {
+        /* AT32F403A is clocking USB from the HSI. To achieve sufficient
+         * clock accuracy, enable automatic clock calibration. */
+        rcc->apb2enr |= RCC_APB2ENR_ACCEN;
+        acc->c1 = 7990;
+        acc->c2 = 8000;
+        acc->c3 = 8010;
+        acc->ctrl1 |= ACC_CTRL1_ENTRIM | ACC_CTRL1_CALON;
+    }
 
     /* Reclaim JTAG pins. */
     afio->mapr = AFIO_MAPR_SWJ_ON_JTAG_OFF;
@@ -128,7 +157,13 @@ static void identify_mcu(void)
     at32f4_series = *(uint8_t *)0x1ffff7f3; /* UID[95:88] */
     switch (at32f4_series) {
     case AT32F403:
+        sram_kb = 96;
+        break;
     case AT32F403A:
+        if (FAST_AT32F403A) {
+            sysclk_mhz = 216;
+            apb_mhz = 108;
+        }
         sram_kb = 96;
         break;
     case AT32F415:
