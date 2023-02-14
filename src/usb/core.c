@@ -36,6 +36,13 @@ static bool_t handle_control_request(void)
         handled = FALSE;
 
     } else if ((req->bmRequestType == 0x80)
+               && (req->bRequest == GET_STATUS)) {
+
+        /* GET_STATUS (Device) */
+        ep0.data_len = 2;
+        memset(ep0.data, 0, ep0.data_len);
+
+    } else if ((req->bmRequestType == 0x80)
                && (req->bRequest == GET_DESCRIPTOR)) {
 
         uint8_t type = req->wValue >> 8;
