@@ -70,6 +70,11 @@ const static struct board_config _board_config[] = {
         .hse_byp   = TRUE,
         .user_pins = _user_pins_v4_slim,
         .msel_pins = _msel_pins_v4_slim },
+    [F4SM_v4_1] = {
+        .hse_mhz   = 8,
+        .flippy    = TRUE,
+        .user_pins = _user_pins_v4,
+        .msel_pins = _msel_pins_v4 },
 };
 
 const struct core_floppy_pins *core_floppy_pins;
@@ -143,6 +148,7 @@ static void mcu_board_init(void)
 {
     switch (gw_info.hw_submodel) {
     case F4SM_v4:
+    case F4SM_v4_1:
         gpio_pull_up_pins(gpioa, 0x0101); /* PA0,8 */
         gpio_pull_up_pins(gpiob, 0x1803); /* PB0-1,11-12 */
         gpio_pull_up_pins(gpioc, 0xffff); /* PC0-15 */

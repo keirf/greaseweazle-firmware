@@ -152,6 +152,7 @@ static uint8_t mcu_get_floppy_pin(unsigned int pin, uint8_t *p_level)
 {
     switch (gw_info.hw_submodel) {
     case F4SM_v4:
+    case F4SM_v4_1:
         if (pin == 34) {
             *p_level = gpio_read_pin(gpiob, 15);
             return ACK_OKAY;

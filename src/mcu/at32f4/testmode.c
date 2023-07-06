@@ -63,6 +63,7 @@ uint8_t testmode_init(void)
 {
     switch (gw_info.hw_submodel) {
     case F4SM_v4:
+    case F4SM_v4_1:
         return ACK_OKAY;
     }
     return ACK_BAD_COMMAND;

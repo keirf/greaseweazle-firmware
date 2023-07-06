@@ -90,6 +90,7 @@ extern unsigned int sram_kb;
 enum {
     F4SM_v4 = 0,
     F4SM_v4_slim,
+    F4SM_v4_1,
 };
 
 /* Core floppy pin assignments vary between F4 submodels (except INDEX, RDATA, 
