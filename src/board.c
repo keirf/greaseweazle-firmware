@@ -93,8 +93,10 @@ void board_init(void)
     /* Activity LED is active low. */
     gpio_configure_pin(gpio_led, pin_led, GPO_pushpull(IOSPD_LOW, HIGH));
 #if defined(NDEBUG) && MCU == AT32F4
-    if (at32f4_series != AT32F415)
+    if ((gw_info.hw_submodel == F4SM_v4) && (at32f4_series != AT32F415)) {
+        /* GW V4 with 403(A) MCU duplicates Activity LED signal on pin TXO. */
         gpio_configure_pin(gpioa, 9, GPO_pushpull(IOSPD_LOW, HIGH));
+    }
 #endif
 }
 
@@ -103,7 +105,7 @@ void act_led(bool_t on)
 {
     gpio_write_pin(gpio_led, pin_led, on ? LOW : HIGH);
 #if defined(NDEBUG) && MCU == AT32F4
-    if (at32f4_series != AT32F415)
+    if ((gw_info.hw_submodel == F4SM_v4) && (at32f4_series != AT32F415))
         gpio_write_pin(gpioa, 9, on ? LOW : HIGH);
 #endif
 }
