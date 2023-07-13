@@ -107,12 +107,12 @@ void early_fatal(int blinks)
     int i;
     rcc->ahb1enr |= RCC_AHB1ENR_GPIOBEN;
     delay_ticks(10);
-    gpio_configure_pin(gpiob, 13, GPO_pushpull(IOSPD_LOW, HIGH));
+    gpio_configure_pin(gpio_led, pin_led, GPO_pushpull(IOSPD_LOW, HIGH));
     for (;;) {
         for (i = 0; i < blinks; i++) {
-            gpio_write_pin(gpiob, 13, LOW);
+            gpio_write_pin(gpio_led, pin_led, LOW);
             early_delay_ms(150);
-            gpio_write_pin(gpiob, 13, HIGH);
+            gpio_write_pin(gpio_led, pin_led, HIGH);
             early_delay_ms(150);
         }
         early_delay_ms(2000);
