@@ -12,11 +12,15 @@
 static volatile time_t time_stamp;
 static struct timer time_stamp_timer;
 
+/* Hardware systick timer overflows every 2^24 ticks. We aim to update
+ * the timestamp at twice that rate (2^23 systicks). */
+#define TIME_UPDATE_PERIOD time_stk(1u<<23)
+
 static void time_stamp_update(void *unused)
 {
     time_t now = time_now();
     time_stamp = ~now;
-    timer_set(&time_stamp_timer, now + time_ms(500));
+    timer_set(&time_stamp_timer, now + TIME_UPDATE_PERIOD);
 }
 
 time_t time_now(void)
@@ -34,7 +38,7 @@ void time_init(void)
     timers_init();
     time_stamp = stk_now();
     timer_init(&time_stamp_timer, time_stamp_update, NULL);
-    timer_set(&time_stamp_timer, time_now() + time_ms(500));
+    timer_set(&time_stamp_timer, time_now() + TIME_UPDATE_PERIOD);
 }
 
 
