@@ -1,6 +1,6 @@
 
 export FW_MAJOR := 1
-export FW_MINOR := 3
+export FW_MINOR := 4
 
 PROJ = greaseweazle-firmware
 VER := $(FW_MAJOR).$(FW_MINOR)
