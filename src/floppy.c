@@ -1479,9 +1479,14 @@ static void process_command(void)
         goto out;
     }
     case CMD_SEEK: {
-        int8_t cyl = u_buf[2];
-        if (len != 3)
+        int cyl;
+        if (len == 3) {
+            cyl = *(int8_t *)&u_buf[2];
+        } else if (len == 4) {
+            cyl = *(int16_t *)&u_buf[2];
+        } else {
             goto bad_command;
+        }
         u_buf[1] = floppy_seek(cyl);
         goto out;
     }
