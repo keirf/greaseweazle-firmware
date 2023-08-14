@@ -53,11 +53,49 @@ void IRQ_40(void) __attribute__((alias("IRQ_INDEX_changed"))); /* EXTI15_10 */
 
 static unsigned int U_BUF_SZ;
 
+static void fpec_extend_sram(bool_t extend)
+{
+    bool_t fap_disabled = !(flash->obr & 2);
+
+    /* Unlock option bytes. */
+    flash->optkeyr = FLASH_UNLOCK_KEY1;
+    flash->optkeyr = FLASH_UNLOCK_KEY2;
+    while (!(flash->cr & FLASH_CR_OPTWRE))
+        cpu_relax();
+
+    /* Erase option bytes. */
+    flash->cr |= FLASH_CR_OPTER;
+    flash->cr |= FLASH_CR_STRT;
+    while (flash->sr & FLASH_SR_BSY)
+        continue;
+    flash->cr &= ~FLASH_CR_OPTER;
+
+    /* Program FAP and EOPB0. */
+    flash->cr |= FLASH_CR_OPTPG;
+    if (fap_disabled) {
+        *(volatile uint16_t *)0x1ffff800 = 0xa5; /* Disable protection */
+        while (flash->sr & FLASH_SR_BSY)
+            continue;
+    }
+    if (extend) {
+        *(volatile uint16_t *)0x1ffff810 = 0xfe; /* Extend SRAM */
+        while (flash->sr & FLASH_SR_BSY)
+            continue;
+    }
+}
+
 static void floppy_mcu_init(void)
 {
     const struct pin_mapping *mpin;
     const struct pin_mapping *upin;
     unsigned int avail_kb;
+
+    /* Extend AT32F403A SRAM. */
+    if ((at32f4_series == AT32F403A) && (sram_kb != 224)) {
+        fpec_init();
+        fpec_extend_sram(TRUE);
+        system_reset();
+    }
 
     avail_kb = sram_kb - ((((unsigned long)_ebss - 0x20000000) + 1023) >> 10);
     for (U_BUF_SZ = 128; U_BUF_SZ > avail_kb; U_BUF_SZ >>= 1)

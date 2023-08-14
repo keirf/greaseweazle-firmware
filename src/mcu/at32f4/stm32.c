@@ -165,6 +165,8 @@ static void identify_mcu(void)
             apb_mhz = 108;
         }
         sram_kb = 96;
+        if (*(uint8_t *)0x1ffff810 == 0xfe) /* EOPB0 */
+            sram_kb += 128;
         break;
     case AT32F415:
         sram_kb = 32;

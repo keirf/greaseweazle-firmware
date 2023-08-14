@@ -29,6 +29,9 @@ struct flash {
     uint32_t wrpr;     /* 20: Write protection */
 };
 
+#define FLASH_UNLOCK_KEY1 0x45670123
+#define FLASH_UNLOCK_KEY2 0xcdef89ab
+
 #define FLASH_ACR_PRFTBS     (1u<< 5)
 #define FLASH_ACR_PRFTBE     (1u<< 4)
 #define FLASH_ACR_HLFCYA     (1u<< 3)

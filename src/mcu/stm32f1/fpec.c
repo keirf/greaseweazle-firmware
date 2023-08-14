@@ -26,8 +26,8 @@ void fpec_init(void)
 
     /* Unlock the FPEC. */
     if (flash->cr & FLASH_CR_LOCK) {
-        flash->keyr = 0x45670123;
-        flash->keyr = 0xcdef89ab;
+        flash->keyr = FLASH_UNLOCK_KEY1;
+        flash->keyr = FLASH_UNLOCK_KEY2;
     }
 
     fpec_wait_and_clear();
