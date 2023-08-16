@@ -90,8 +90,9 @@ static void floppy_mcu_init(void)
     const struct pin_mapping *upin;
     unsigned int avail_kb;
 
-    /* Extend AT32F403A SRAM. */
-    if ((at32f4_series == AT32F403A) && (sram_kb != 224)) {
+    /* Extend AT32F403/AT32F403A SRAM. */
+    if (((at32f4_series == AT32F403) || (at32f4_series == AT32F403A))
+        && (sram_kb != 224)) {
         fpec_init();
         fpec_extend_sram(TRUE);
         system_reset();

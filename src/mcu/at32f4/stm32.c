@@ -156,14 +156,13 @@ static void identify_mcu(void)
 
     at32f4_series = *(uint8_t *)0x1ffff7f3; /* UID[95:88] */
     switch (at32f4_series) {
-    case AT32F403:
-        sram_kb = 96;
-        break;
     case AT32F403A:
         if (FAST_AT32F403A) {
             sysclk_mhz = 216;
             apb_mhz = 108;
         }
+        /* fall through */
+    case AT32F403:
         sram_kb = 96;
         if (*(uint8_t *)0x1ffff810 == 0xfe) /* EOPB0 */
             sram_kb += 128;
