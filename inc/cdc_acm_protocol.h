@@ -164,6 +164,7 @@ struct packed gw_info {
     uint8_t mcu_id;
     uint16_t mcu_mhz;
     uint16_t mcu_sram_kb;
+    uint16_t usb_buf_kb;
 };
 extern struct gw_info gw_info;
 

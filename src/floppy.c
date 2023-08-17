@@ -565,6 +565,10 @@ void floppy_init(void)
 {
     floppy_mcu_init();
 
+    gw_info.fw_major = fw_major;
+    gw_info.fw_minor = fw_minor;
+    gw_info.usb_buf_kb = U_BUF_SZ >> 10;
+
     /* Output pins, unbuffered. */
     configure_pin(dir,    GPO_bus);
     configure_pin(step,   GPO_bus);
@@ -1441,8 +1445,6 @@ static void process_command(void)
         memset(&u_buf[2], 0, 32);
         switch(idx) {
         case GETINFO_FIRMWARE: /* gw_info */
-            gw_info.fw_major = fw_major;
-            gw_info.fw_minor = fw_minor;
             memcpy(&u_buf[2], &gw_info, sizeof(gw_info));
             break;
         case GETINFO_BW_STATS: /* gw_bw_stats */ {
