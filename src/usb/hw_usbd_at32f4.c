@@ -76,9 +76,6 @@ static void usbd_init(void)
     usb->cntr &= ~USB_CNTR_FRES;
     delay_us(10);
 
-    /* Clear IRQ state. */
-    usb->istr = 0;
-
     IRQx_set_prio(USB_HP_IRQ, USB_IRQ_PRI);
     IRQx_enable(USB_HP_IRQ);
 }
@@ -321,7 +318,6 @@ static void handle_reset(void)
     buf_end = 64;
     usb_configure_ep(0, EPT_CONTROL, EP0_MPS);
     usb->daddr = USB_DADDR_EF | USB_DADDR_ADD(0);
-    usb->istr &= ~USB_ISTR_RESET;
 }
 
 static void clear_ctr(uint8_t ep, uint16_t ctr)
@@ -376,7 +372,7 @@ static void handle_tx_transfer(uint8_t epnr)
 static void usbd_process(void)
 {
     uint16_t istr = usb->istr;
-    usb->istr = ~istr & 0x7f00;
+    usb->istr = ~istr;
 
     if (istr & USB_ISTR_CTR) {
         uint8_t ep = USB_ISTR_GET_EP_ID(istr);
