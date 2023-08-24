@@ -23,6 +23,7 @@ else
 OBJS += main.o
 OBJS += floppy.o
 OBJS += testmode.o
+OBJS += thread.o
 
 endif
 
