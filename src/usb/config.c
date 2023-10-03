@@ -28,7 +28,8 @@ const uint8_t device_qualifier[] aligned(2) = {
     0x00,0x02, /* USB 2.0 */
     2, 0, 0,   /* Class, Subclass, Protocol: CDC */
     64,        /* Max Packet Size */
-    1          /* Number of configurations */
+    1,         /* Number of configurations */
+    0          /* bReserved - must be zero */
 };
 
 const uint8_t config_fs_descriptor[] aligned(2) = {
