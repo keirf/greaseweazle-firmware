@@ -22,8 +22,8 @@ const uint8_t device_descriptor[] aligned(2) = {
     1          /* Number of configurations */
 };
 
-const uint8_t device_qualifier[] aligned(2) = {
-    10,        /* Length */
+const uint8_t device_qualifier[9] aligned(2) = {
+    9,        /* Length */
     DESC_DEVICE_QUALIFIER,
     0x00,0x02, /* USB 2.0 */
     2, 0, 0,   /* Class, Subclass, Protocol: CDC */
