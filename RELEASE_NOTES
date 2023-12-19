@@ -3,6 +3,12 @@
 ** Keir Fraser <keir.xen@gmail.com>
 ************************************
 
+** v1.5 - 19 December 2023
+ - AT32F403(A): Extend SRAM from 96kB to 224kB
+ - Report USB buffer size in 'gw info'
+ - GCC12 build fixes
+ - USB High Speed: Fix device_qualifier descriptor
+
 ** v1.4 - 22 July 2023
  - New board type: V4.1 (AT32F4xx, USB-C)
 
