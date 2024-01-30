@@ -413,7 +413,7 @@ static uint8_t floppy_seek(int cyl)
             return rc;
     }
 
-    if ((cyl < (u->is_flippy ? -8 : 0)) || (cyl > 100))
+    if (cyl < (u->is_flippy ? -8 : 0))
         return ACK_BAD_CYLINDER;
 
     if (u->cyl < cyl) {
