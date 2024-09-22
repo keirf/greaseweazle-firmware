@@ -226,6 +226,8 @@ struct packed gw_delay {
     uint16_t seek_settle;  /* msec */
     uint16_t motor_delay;  /* msec */
     uint16_t watchdog;     /* msec */
+    uint16_t pre_write;    /* min. usec since previous head change */
+    uint16_t post_write;   /* min. usec to next write/step/head-change */
 };
 
 /* CMD_SWITCH_FW_MODE */

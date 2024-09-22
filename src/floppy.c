@@ -24,8 +24,17 @@
 #define sample_us(x) ((x) * SAMPLE_MHZ)
 #define time_from_samples(x) udiv64((uint64_t)(x) * TIME_MHZ, SAMPLE_MHZ)
 
-#define write_pin(pin, level) \
-    gpio_write_pin(gpio_##pin, pin_##pin, level ? O_TRUE : O_FALSE)
+/* Track and modify states of output pins. */
+static struct {
+    bool_t dir;
+    bool_t step;
+    bool_t wgate;
+    bool_t head;
+} pins;
+#define read_pin(pin) pins.pin
+#define write_pin(pin, level) ({                                        \
+    gpio_write_pin(gpio_##pin, pin_##pin, level ? O_TRUE : O_FALSE);    \
+    pins.pin = level; })
 
 static int bus_type = -1;
 static int unit_nr = -1;
@@ -42,7 +51,9 @@ static const struct gw_delay factory_delay_params = {
     .step_delay = 10000,
     .seek_settle = 15,
     .motor_delay = 750,
-    .watchdog = 10000
+    .watchdog = 10000,
+    .pre_write = 100,
+    .post_write = 1000
 };
 
 extern uint8_t u_buf[];
@@ -124,6 +135,43 @@ static enum {
 
 static uint32_t u_cons, u_prod;
 #define U_MASK(x) ((x)&(U_BUF_SZ-1))
+
+static struct {
+    struct timer timer;
+    unsigned int mask;
+#define DELAY_read  (1u<<0)
+#define DELAY_write (1u<<1)
+#define DELAY_seek  (1u<<2)
+#define DELAY_head  (1u<<3)
+} op_delay;
+static void op_delay_timer(void *unused);
+
+/* Delay specified operation(s) by specified number of microseconds. */
+static void op_delay_async(unsigned int mask, unsigned int usec)
+{
+    time_t deadline;
+
+    /* Very long delays fall back to synchronous wait. */
+    if (usec > 1000000u) {
+        delay_us(usec);
+        return;
+    }
+
+    deadline = time_now() + time_us(usec);
+    timer_cancel(&op_delay.timer);
+    if ((op_delay.mask != 0) &&
+        (time_diff(op_delay.timer.deadline, deadline) < 0))
+        deadline = op_delay.timer.deadline;
+    op_delay.mask |= mask;
+    timer_set(&op_delay.timer, deadline);
+}
+
+/* Wait for specified operation(s) to be permitted. */
+static void op_delay_wait(unsigned int mask)
+{
+    while (op_delay.mask & mask)
+        cpu_relax();
+}
 
 static void drive_deselect(void)
 {
@@ -407,6 +455,8 @@ static uint8_t floppy_seek(int cyl)
         return ACK_NO_UNIT;
     u = &unit[unit_nr];
 
+    op_delay_wait(DELAY_seek);
+
     if (!u->initialised) {
         uint8_t rc = floppy_seek_initialise(u);
         if (rc != ACK_OKAY)
@@ -433,7 +483,8 @@ static uint8_t floppy_seek(int cyl)
 
     flippy_trk0_sensor_enable();
 
-    delay_ms(delay_params.seek_settle);
+    op_delay_async(DELAY_read | DELAY_write | DELAY_seek,
+                   delay_params.seek_settle * 1000u);
     u->cyl = cyl;
 
     return ACK_OKAY;
@@ -468,8 +519,12 @@ static uint8_t floppy_noclick_step(void)
 static void floppy_flux_end(void)
 {
     /* Turn off write pins. */
-    write_pin(wgate, FALSE);
-    configure_pin(wdata, GPO_bus);    
+    if (read_pin(wgate)) {
+        write_pin(wgate, FALSE);
+        configure_pin(wdata, GPO_bus);
+        op_delay_async(DELAY_write | DELAY_seek | DELAY_head,
+                       delay_params.post_write);
+    }
 
     /* Turn off timers. */
     tim_rdata->ccer = 0;
@@ -588,6 +643,9 @@ void floppy_init(void)
     exti->imr = exti->ftsr = m(pin_index);
     IRQx_set_prio(irq_index, INDEX_IRQ_PRI);
     IRQx_enable(irq_index);
+
+    op_delay.mask = 0;
+    timer_init(&op_delay.timer, op_delay_timer, NULL);
 
     delay_params = factory_delay_params;
 
@@ -722,6 +780,8 @@ static void rdata_encode_flux(void)
 
 static uint8_t floppy_read_prep(const struct gw_read_flux *rf)
 {
+    op_delay_wait(DELAY_read);
+
     /* Prepare Timer & DMA. */
     dma_rdata.mar = (uint32_t)(unsigned long)dma.buf;
     dma_rdata.ndtr = ARRAY_SIZE(dma.buf);    
@@ -1097,6 +1157,8 @@ static void floppy_write_wait_data(void)
         && !write_finished)
         return;
 
+    op_delay_wait(DELAY_write);
+
     floppy_state = ST_write_flux_wait_index;
     flux_op.start = time_now();
 
@@ -1215,6 +1277,8 @@ static void floppy_write_drain(void)
 
 static uint8_t floppy_erase_prep(const struct gw_erase_flux *ef)
 {
+    op_delay_wait(DELAY_write);
+
     if (get_wrprot() == LOW)
         return ACK_WRPROT;
 
@@ -1232,7 +1296,7 @@ static void floppy_erase(void)
     if (time_since(flux_op.end) < 0)
         return;
 
-    write_pin(wgate, FALSE);
+    floppy_flux_end();
 
     /* ACK with Status byte. */
     u_buf[0] = flux_op.status;
@@ -1496,7 +1560,11 @@ static void process_command(void)
         uint8_t head = u_buf[2];
         if ((len != 3) || (head > 1))
             goto bad_command;
-        write_pin(head, head);
+        if (read_pin(head) != head) {
+            op_delay_wait(DELAY_head);
+            write_pin(head, head);
+            op_delay_async(DELAY_write, delay_params.pre_write);
+        }
         break;
     }
     case CMD_SET_PARAMS: {
@@ -1783,6 +1851,13 @@ static void index_timer(void *unused)
         index.isr_time = now - INDEX_TIMER_PERIOD;
     IRQ_global_enable();
     timer_set(&index.timer, now + INDEX_TIMER_PERIOD);
+}
+
+static void op_delay_timer(void *unused)
+{
+    while (time_diff(time_now(), op_delay.timer.deadline) > 0)
+        cpu_relax();
+    op_delay.mask = 0;
 }
 
 /*
