@@ -6,12 +6,11 @@ on:
 name: Release
 
 jobs:
-
-  build-ubuntu:
+  build:
     runs-on: ubuntu-22.04
     steps:
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set environment variables
       id: vars
@@ -26,33 +25,10 @@ jobs:
     - name: Dependency packages (pip)
       run: python3 -m pip install --user crcmod
 
-    - name: Build dist
+    - name: Build release
       run: |
         make -j4 dist
         mv out/*.zip .
-
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: greaseweazle-firmware.ci.${{ steps.vars.outputs.ver }}
-        path: greaseweazle-firmware-${{ steps.vars.outputs.ver }}.zip
-
-  finalise:
-    needs: build-ubuntu
-    runs-on: ubuntu-22.04
-    steps:
-
-    - uses: actions/checkout@v3
-
-    - name: Set environment variables
-      id: vars
-      run: |
-        echo "ver=$(echo ${{ github.ref }} | sed -e's#.*/v##')" >> $GITHUB_OUTPUT
-
-    - name: Download artifacts
-      uses: actions/download-artifact@v3
-      with:
-        name: greaseweazle-firmware.ci.${{ steps.vars.outputs.ver }}
 
     - name: Create Release
       id: create_release

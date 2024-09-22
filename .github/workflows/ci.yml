@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set environment variables
       id: vars
@@ -50,7 +50,7 @@ jobs:
         mv $P-$V.zip _cidist/
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: greaseweazle-firmware.ci.${{ steps.vars.outputs.sha_short }}
         path: _cidist
