@@ -53,7 +53,8 @@ static const struct gw_delay factory_delay_params = {
     .motor_delay = 750,
     .watchdog = 10000,
     .pre_write = 100,
-    .post_write = 1000
+    .post_write = 1000,
+    .index_mask = 200
 };
 
 extern uint8_t u_buf[];
@@ -71,13 +72,13 @@ static struct index {
     volatile unsigned int count;
     /* For synchronising index pulse reporting to the RDATA flux stream. */
     volatile unsigned int rdata_cnt;
-    /* Last time at which ISR fired. */
-    time_t isr_time;
+    /* Last time at which index was triggered. */
+    time_t trigger_time;
     /* Timer structure for index_timer() calls. */
     struct timer timer;
 } index;
 
-/* Timer to clean up stale index.isr_time. */
+/* Timer to clean up stale index.trigger_time. */
 #define INDEX_TIMER_PERIOD time_ms(5000)
 static void index_timer(void *unused);
 
@@ -1825,15 +1826,15 @@ const struct usb_class_ops usb_cdc_acm_ops = {
 static void IRQ_INDEX_changed(void)
 {
     unsigned int cnt = tim_rdata->cnt;
-    time_t now = time_now(), prev = index.isr_time;
+    time_t now = time_now();
 
     /* Clear INDEX-changed flag. */
     exti->pr = m(pin_index);
 
-    index.isr_time = now;
-    if (time_diff(prev, now) < time_us(50))
+    if (time_diff(index.trigger_time, now) < time_us(delay_params.index_mask))
         return;
 
+    index.trigger_time = now;
     index.count++;
     index.rdata_cnt = cnt;
 }
@@ -1842,13 +1843,13 @@ static void index_timer(void *unused)
 {
     time_t now = time_now();
     IRQ_global_disable();
-    /* index.isr_time mustn't get so old that the time_diff() test in
+    /* index.trigger_time mustn't get so old that the time_diff() test in
      * IRQ_INDEX_changed() overflows. To prevent this, we ensure that,
      * at all times,
-     *   time_diff(index.isr_time, time_now()) < 2*INDEX_TIMER_PERIOD + delta,
+     *   time_diff(index.trigger_time, now) < 2*INDEX_TIMER_PERIOD + delta,
      * where delta is small. */
-    if (time_diff(index.isr_time, now) > INDEX_TIMER_PERIOD)
-        index.isr_time = now - INDEX_TIMER_PERIOD;
+    if (time_diff(index.trigger_time, now) > INDEX_TIMER_PERIOD)
+        index.trigger_time = now - INDEX_TIMER_PERIOD;
     IRQ_global_enable();
     timer_set(&index.timer, now + INDEX_TIMER_PERIOD);
 }

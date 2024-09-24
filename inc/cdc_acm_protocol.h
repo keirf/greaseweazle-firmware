@@ -221,13 +221,14 @@ struct packed gw_sink_source_bytes {
 /* CMD_{GET,SET}_PARAMS, index 0 */
 #define PARAMS_DELAYS 0
 struct packed gw_delay {
-    uint16_t select_delay; /* usec */
-    uint16_t step_delay;   /* usec */
-    uint16_t seek_settle;  /* msec */
-    uint16_t motor_delay;  /* msec */
-    uint16_t watchdog;     /* msec */
-    uint16_t pre_write;    /* min. usec since previous head change */
-    uint16_t post_write;   /* min. usec to next write/step/head-change */
+    uint16_t select_delay; /* (usec) delay after asserting a drive select */
+    uint16_t step_delay;   /* (usec) delay after a head-step pulse */
+    uint16_t seek_settle;  /* (msec) delay after completing a seek operation */
+    uint16_t motor_delay;  /* (msec) delay after turning on a drive spindle */
+    uint16_t watchdog;     /* (msec) timeout after last command */
+    uint16_t pre_write;    /* (usec) min time since previous head change */
+    uint16_t post_write;   /* (usec) min time to next write/step/head-change */
+    uint16_t index_mask;   /* (usec) post-trigger index mask */
 };
 
 /* CMD_SWITCH_FW_MODE */
