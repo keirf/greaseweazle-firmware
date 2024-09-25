@@ -40,7 +40,7 @@
 /* CMD_READ_FLUX, length=8-12. Argument is gw_read_flux; optional fields
  * may be omitted. Returns flux readings terminating with EOStream (NUL). */
 #define CMD_READ_FLUX       7
-/* CMD_WRITE_FLUX, length=4. Argument is gw_write_flux.
+/* CMD_WRITE_FLUX, length=4-8. Argument is gw_write_flux.
  * Host follows the ACK with flux values terminating with EOStream (NUL).
  * Device finally returns a status byte, 0 on success.
  * No further commands should be issued until the status byte is received. */
@@ -205,6 +205,10 @@ struct packed gw_write_flux {
     uint8_t cue_at_index;
     /* If non-zero, terminate the write at the next index pulse. */
     uint8_t terminate_at_index;
+    /** OPTIONAL FIELDS: **/
+    /* Hard sector time, in ticks. Used to find first sector and to trigger
+     * cue_at_index and terminate_at_index, if they are enabled. */
+    uint32_t hard_sector_ticks; /* default: 0 (disabled) */
 };
 
 /* CMD_ERASE_FLUX */

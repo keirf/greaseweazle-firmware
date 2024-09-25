@@ -72,6 +72,9 @@ static struct index {
     volatile unsigned int count;
     /* For synchronising index pulse reporting to the RDATA flux stream. */
     volatile unsigned int rdata_cnt;
+    /* Threshold and trigger for detecting a hard-sector index hole. */
+    uint32_t hard_sector_thresh; /* hole-to-hole threshold to detect index */
+    uint32_t hard_sector_trigger; /* != 0 -> trigger is primed */
     /* Last time at which index was triggered. */
     time_t trigger_time;
     /* Timer structure for index_timer() calls. */
@@ -517,6 +520,16 @@ static uint8_t floppy_noclick_step(void)
     return ACK_OKAY;
 }
 
+static void index_set_hard_sector_detection(uint32_t hard_sector_ticks)
+{
+    uint32_t hard_sector_time = time_from_samples(hard_sector_ticks);
+
+    IRQ_global_disable();
+    index.hard_sector_thresh = hard_sector_time * 3 / 4;
+    index.hard_sector_trigger = 0;
+    IRQ_global_enable();
+}
+
 static void floppy_flux_end(void)
 {
     /* Turn off write pins. */
@@ -540,6 +553,9 @@ static void floppy_flux_end(void)
     dma_wdata.cr &= ~DMA_CR_EN;
     while ((dma_rdata.cr & DMA_CR_EN) || (dma_wdata.cr & DMA_CR_EN))
         continue;
+
+    /* Disable hard-sector index detection. */
+    index_set_hard_sector_detection(0);
 }
 
 static void quiesce_drives(void)
@@ -1129,6 +1145,8 @@ static uint8_t floppy_write_prep(const struct gw_write_flux *wf)
     write.cue_at_index = wf->cue_at_index;
     write.terminate_at_index = wf->terminate_at_index;
 
+    index_set_hard_sector_detection(wf->hard_sector_ticks);
+
     return ACK_OKAY;
 }
 
@@ -1605,8 +1623,9 @@ static void process_command(void)
         goto out;
     }
     case CMD_WRITE_FLUX: {
-        struct gw_write_flux wf;
-        if (len != (2 + sizeof(wf)))
+        struct gw_write_flux wf = {};
+        if ((len < (2 + offsetof(struct gw_write_flux, hard_sector_ticks)))
+            || (len > (2 + sizeof(wf))))
             goto bad_command;
         memcpy(&wf, &u_buf[2], len-2);
         u_buf[1] = floppy_write_prep(&wf);
@@ -1827,14 +1846,33 @@ static void IRQ_INDEX_changed(void)
 {
     unsigned int cnt = tim_rdata->cnt;
     time_t now = time_now();
+    int32_t delta;
 
     /* Clear INDEX-changed flag. */
     exti->pr = m(pin_index);
 
-    if (time_diff(index.trigger_time, now) < time_us(delay_params.index_mask))
+    delta = time_diff(index.trigger_time, now);
+    if (delta < time_us(delay_params.index_mask))
         return;
-
     index.trigger_time = now;
+
+    if (unlikely(index.hard_sector_thresh != 0)) {
+        if (delta > index.hard_sector_thresh) {
+            /* Long pulse indicates a subsequent sector hole. Filter it out
+             * and unprime the index trigger. */
+            index.hard_sector_trigger = 0;
+            return;
+        }
+        /* First short pulse indicates the extra (index) hole. Second
+         * consecutive short pulse is the first sector hole: That's the only
+         * one we count. */
+        index.hard_sector_trigger ^= 1;
+        if (index.hard_sector_trigger) {
+            /* Filter out the "rising edge" of the trigger. */
+            return;
+        }
+    }
+
     index.count++;
     index.rdata_cnt = cnt;
 }
