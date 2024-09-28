@@ -3,6 +3,13 @@
 ** Keir Fraser <keir.xen@gmail.com>
 ************************************
 
+** v1.6 - 28 September 2024
+ - Flux write: Whole-track writes to hard-sectored disks
+ - Pre- and post-write delays: Specified by many drive datasheets
+   - Required for correct interaction with offset tunnel-erase heads
+ - Configurable "Index Mask", for debouncing noisy INDEX signals
+ - Seek (HDD): Remove arbitrary 100-cylinder limit
+
 ** v1.5 - 19 December 2023
  - AT32F403(A): Extend SRAM from 96kB to 224kB
  - Report USB buffer size in 'gw info'
