@@ -27,7 +27,7 @@ GPIO gpio_from_id(uint8_t id)
 #endif
     }
     ASSERT(0);
-    return NULL;
+    for(;;);
 }
 
 uint8_t write_mapped_pin(
