@@ -10,9 +10,9 @@
  */
 
 #ifndef NDEBUG
-#define ASSERT(p) do { if (!(p)) illegal(); } while (0)
+#define ASSERT(p) { if (!(p)) illegal(); }
 #else
-#define ASSERT(p) do { if (0 && (p)) {} } while (0)
+#define ASSERT(p) { (p); }
 #endif
 
 typedef char bool_t;
