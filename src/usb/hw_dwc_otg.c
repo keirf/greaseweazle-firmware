@@ -287,7 +287,7 @@ static void dwc_otg_configure_ep(uint8_t epnr, uint8_t type, uint32_t size)
              * Check we aren't trying to map it to multiple endpoints. */
             ep->rx = NULL;
             for (i = 0; i < conf_nr_ep; i++)
-                ASSERT(ep->rx != rx_bufn);
+                ASSERT(eps[i].rx != rx_bufn);
             ep->rx = rx_bufn;
             ep->rx_nr = ARRAY_SIZE(rx_bufn);
         }
