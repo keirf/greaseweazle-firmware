@@ -65,7 +65,7 @@ void hw_usb_init(void)
         }
         break;
     default:
-        ASSERT(0);
+        unreachable();
     }
 
     peripheral_clock_delay();
@@ -109,7 +109,7 @@ void hw_usb_deinit(void)
         rcc->ahb1enr &= ~RCC_AHB1ENR_OTGHSEN;
         break;
     default:
-        ASSERT(0);
+        unreachable();
     }
 }
 

@@ -26,8 +26,7 @@ GPIO gpio_from_id(uint8_t id)
     case _I: return gpioi;
 #endif
     }
-    ASSERT(0);
-    return NULL;
+    unreachable();
 }
 
 uint8_t write_mapped_pin(

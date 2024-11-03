@@ -410,9 +410,8 @@ static void handle_iepint(uint8_t epnr)
             handle_tx_ep0();
     }
 
-    if (iepint & OTG_DIEPINT_TXFE) {
-        ASSERT(0);
-    }
+    /* We don't set DIEPEMPMSK bits so TXFE notification is impossible. */
+    ASSERT(!(iepint & OTG_DIEPINT_TXFE));
 }
 
 static void dwc_otg_process(void)
