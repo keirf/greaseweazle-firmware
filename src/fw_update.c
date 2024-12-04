@@ -175,7 +175,7 @@ static void process_command(void)
             goto bad_command;
         if (mode == FW_MODE_NORMAL) {
             usb_deinit();
-            delay_ms(500);
+            delay_us(100);
             system_reset();
         }
         break;

@@ -1706,7 +1706,7 @@ static void process_command(void)
             goto bad_command;
         if (mode == FW_MODE_BOOTLOADER) {
             usb_deinit();
-            delay_ms(500);
+            delay_us(100);
             _reset_flag = 0xdeadbeef;
             dcache_disable();
             system_reset();
