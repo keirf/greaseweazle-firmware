@@ -21,7 +21,7 @@ objdir = sys.argv[1]
 stem = objdir[objdir.rfind('/out'):]
 
 # stem = [/<rest_of_path>]
-m = re.match('/[^/]*'*NR_LEVELS+'(/.*)?', stem)
+m = re.match(r'/[^/]*'*NR_LEVELS+r'(/.*)?', stem)
 stem = '' if m.group(1) is None else m.group(1)
 
 # srcdir = path to sources, relative to objdir

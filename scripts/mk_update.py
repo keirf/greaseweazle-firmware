@@ -53,7 +53,7 @@ def mk_cat_entry(dat, hw_model, major, minor, sig):
 
 def new_upd(argv):
     dat = b'GWUP'
-    m = re.match('([^-]+)-(\d+)\.(\d+)-(y?)', argv[1])
+    m = re.match(r'([^-]+)-(\d+)\.(\d+)-(y?)', argv[1])
     hw_model = name_to_hw_model[m.group(1)]
     major, minor = int(m.group(2)), int(m.group(3))
     is_bootloader = (m.group(4) == 'y')
