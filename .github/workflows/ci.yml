@@ -21,7 +21,7 @@ jobs:
         sudo apt -y install git gcc-arm-none-eabi python3-pip srecord zip
 
     - name: Dependency packages (pip)
-      run: python3 -m pip install --user crcmod
+      run: python3 -m pip install --user crcmod intelhex
 
     - name: Build dist
       run: |

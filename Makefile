@@ -33,26 +33,31 @@ out: FORCE
 	+mkdir -p out/$(mcu)/$(level)/$(target)
 
 target: FORCE out
-	$(MAKE) -C out/$(mcu)/$(level)/$(target) -f $(ROOT)/Rules.mk target.bin target.hex target.upd $(mcu)=y $(level)=y $(target)=y
+	$(MAKE) -C out/$(mcu)/$(level)/$(target) -f $(ROOT)/Rules.mk target.bin target.hex target.dfu target.upd $(mcu)=y $(level)=y $(target)=y
 
 dist: level := prod
 dist: t := $(ROOT)/out/$(PROJ)-$(VER)
 dist: FORCE all
 	rm -rf out/$(PROJ)-*
 	mkdir -p $(t)/hex/alt
+	mkdir -p $(t)/dfu/alt
 	cd out/stm32f1/$(level)/greaseweazle; \
 	  cp -a target.hex $(t)/hex/$(PROJ)-f1-$(VER).hex; \
+	  cp -a target.dfu $(t)/dfu/$(PROJ)-f1-$(VER).dfu; \
 	  cp -a ../bootloader/target.upd $(t)/$(PROJ)-$(VER).upd; \
 	  $(PYTHON) $(ROOT)/scripts/mk_update.py cat $(t)/$(PROJ)-$(VER).upd \
 	    target.upd
 	cd out/stm32f1/debug/blinky; \
-	  cp -a target.hex $(t)/hex/alt/blinky-test-f1-$(VER).hex
+	  cp -a target.hex $(t)/hex/alt/blinky-test-f1-$(VER).hex; \
+	  cp -a target.dfu $(t)/dfu/alt/blinky-test-f1-$(VER).dfu
 	cd out/stm32f7/$(level)/greaseweazle; \
 	  cp -a target.hex $(t)/hex/$(PROJ)-f7-$(VER).hex; \
+	  cp -a target.dfu $(t)/dfu/$(PROJ)-f7-$(VER).dfu; \
 	  $(PYTHON) $(ROOT)/scripts/mk_update.py cat $(t)/$(PROJ)-$(VER).upd \
 	    ../bootloader/target.upd target.upd
 	cd out/at32f4/$(level)/greaseweazle; \
 	  cp -a target.hex $(t)/hex/$(PROJ)-at32f4-$(VER).hex; \
+	  cp -a target.dfu $(t)/dfu/$(PROJ)-at32f4-$(VER).dfu; \
 	  $(PYTHON) $(ROOT)/scripts/mk_update.py cat $(t)/$(PROJ)-$(VER).upd \
 	    ../bootloader/target.upd target.upd
 	cp -a COPYING $(t)/

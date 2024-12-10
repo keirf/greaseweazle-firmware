@@ -20,12 +20,15 @@ FLAGS += -Wno-unused-value -ffunction-sections
 
 ifeq ($(mcu),stm32f1)
 FLAGS += -mcpu=cortex-m3 -DSTM32F1=1 -DMCU=1
+DFU_DEV = 0x0483:0xdf11
 stm32f1=y
 else ifeq ($(mcu),stm32f7)
 FLAGS += -mcpu=cortex-m7 -DSTM32F7=7 -DMCU=7
+DFU_DEV = 0x0483:0xdf11
 stm32f7=y
 else ifeq ($(mcu),at32f4)
 FLAGS += -mcpu=cortex-m4 -DAT32F4=4 -DMCU=4
+DFU_DEV = 0x2e3c:0xdf11
 at32f4=y
 endif
 
@@ -100,6 +103,9 @@ endif
 	@echo OBJCOPY $@
 	$(OBJCOPY) -O binary $< $@
 	chmod a-x $@
+
+%.dfu: %.hex
+	$(PYTHON) $(ROOT)/scripts/dfu-convert.py -i $< -D $(DFU_DEV) $@
 
 %.upd: %.bin
 	$(PYTHON) $(ROOT)/scripts/mk_update.py new $@ \
