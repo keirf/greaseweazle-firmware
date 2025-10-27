@@ -49,6 +49,7 @@ void *memcpy(void *dest, const void *src, size_t n)
 
 asm (
 ".global memcpy_fast, memset_fast\n"
+".thumb_func\n"
 "memcpy_fast:\n"
 "    push  {r4-r10}\n"
 "1:  ldmia r1!,{r3-r10}\n"
@@ -57,6 +58,7 @@ asm (
 "    bne   1b\n"
 "    pop   {r4-r10}\n"
 "    bx    lr\n"
+".thumb_func\n"
 "memset_fast:\n"
 "    push  {r4-r10}\n"
 "    uxtb  r5, r1\n"
