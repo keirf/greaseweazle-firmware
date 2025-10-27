@@ -12,93 +12,109 @@
 #define gpio_led gpiob
 #define pin_led 13
 
-const static struct pin_mapping _msel_pins_std[] = {
-    { 10, _B,  1 },
-    { 12, _B,  0 },
-    { 14, _B, 11 },
-    { 16, _B, 10 },
-    {  0,  0,  0 }
-};
-
-const static struct pin_mapping _msel_pins_f7_slim[] = {
-    { 10, _B,  1 },
-    { 14, _B, 11 },
-    {  0,  0,  0 }
-};
-
 const static struct pin_mapping _user_pins_F7SM_v1[] = {
-    { 2, _B, 12, _OD },
-    { 0,  0,  0, _OD } };
+    {  2, _B, 12, _OD },
+    { 10, _B,  1, _OD },
+    { 12, _B,  0, _OD },
+    { 14, _B, 11, _OD },
+    { 16, _B, 10, _OD },
+    {  0,  0,  0, _OD } };
+
 const static struct pin_mapping _user_pins_F7SM_ant_goffart_f7_plus_v1[] = {
-    { 2, _B, 12, _OD }, /* board bug: B12 isn't buffered */
-    { 4, _C,  6, _PP },
-    { 0,  0,  0, _PP } };
+    {  2, _B, 12, _OD }, /* board bug: B12 isn't buffered */
+    {  4, _C,  6, _PP },
+    { 10, _B,  1, _PP },
+    { 12, _B,  0, _PP },
+    { 14, _B, 11, _PP },
+    { 16, _B, 10, _PP },
+    {  0,  0,  0, _PP } };
+
 const static struct pin_mapping _user_pins_F7SM_lightning[] = {
-    { 2, _B, 12, _PP },
-    { 4, _E, 15, _PP },
-    { 6, _E, 14, _PP },
-    { 0,  0,  0, _PP } };
+    {  2, _B, 12, _PP },
+    {  4, _E, 15, _PP },
+    {  6, _E, 14, _PP },
+    { 10, _B,  1, _PP },
+    { 12, _B,  0, _PP },
+    { 14, _B, 11, _PP },
+    { 16, _B, 10, _PP },
+    {  0,  0,  0, _PP } };
+
 const static struct pin_mapping _user_pins_F7SM_v2[] = {
-    { 2, _B, 12, _OD },
-    { 4, _C,  8, _OD },
-    { 6, _C,  7, _OD },
-    { 0,  0,  0, _OD } };
+    {  2, _B, 12, _OD },
+    {  4, _C,  8, _OD },
+    {  6, _C,  7, _OD },
+    { 10, _B,  1, _OD },
+    { 12, _B,  0, _OD },
+    { 14, _B, 11, _OD },
+    { 16, _B, 10, _OD },
+    {  0,  0,  0, _OD } };
+
 const static struct pin_mapping _user_pins_F7SM_ant_goffart_f7_plus_v2[] = {
-    { 2, _B, 12, _PP },
-    { 4, _C,  8, _PP },
-    { 6, _C,  7, _PP },
-    { 0,  0,  0, _PP } };
+    {  2, _B, 12, _PP },
+    {  4, _C,  8, _PP },
+    {  6, _C,  7, _PP },
+    { 10, _B,  1, _PP },
+    { 12, _B,  0, _PP },
+    { 14, _B, 11, _PP },
+    { 16, _B, 10, _PP },
+    {  0,  0,  0, _PP } };
+
 const static struct pin_mapping _user_pins_F7SM_lightning_plus[] = {
-    { 2, _B, 12, _PP },
-    { 4, _E, 15, _PP },
-    { 6, _E, 14, _PP },
-    { 0,  0,  0, _PP } };
+    {  2, _B, 12, _PP },
+    {  4, _E, 15, _PP },
+    {  6, _E, 14, _PP },
+    { 10, _B,  1, _PP },
+    { 12, _B,  0, _PP },
+    { 14, _B, 11, _PP },
+    { 16, _B, 10, _PP },
+    {  0,  0,  0, _PP } };
+
 const static struct pin_mapping _user_pins_F7SM_slim[] = {
-    { 0,  0,  0, _PP } };
+    { 10, _B,  1, _PP },
+    { 14, _B, 11, _PP },
+    {  0,  0,  0, _PP } };
+
 const static struct pin_mapping _user_pins_F7SM_v3[] = {
-    { 2, _B, 12, _PP },
-    { 4, _C,  8, _PP },
-    { 6, _C,  7, _PP },
-    { 0,  0,  0, _PP } };
+    {  2, _B, 12, _PP },
+    {  4, _C,  8, _PP },
+    {  6, _C,  7, _PP },
+    { 10, _B,  1, _PP },
+    { 12, _B,  0, _PP },
+    { 14, _B, 11, _PP },
+    { 16, _B, 10, _PP },
+    {  0,  0,  0, _PP } };
+
 const static struct board_config _board_config[] = {
     [F7SM_v1] = {
         .hse_mhz   = 8,
-        .user_pins = _user_pins_F7SM_v1,
-        .msel_pins = _msel_pins_std },
+        .user_pins = _user_pins_F7SM_v1 },
     [F7SM_ant_goffart_f7_plus_v1] = {
         .hse_mhz   = 8,
-        .user_pins = _user_pins_F7SM_ant_goffart_f7_plus_v1,
-        .msel_pins = _msel_pins_std },
+        .user_pins = _user_pins_F7SM_ant_goffart_f7_plus_v1 },
     [F7SM_lightning] = {
         .hse_mhz   = 16,
         .hs_usb    = TRUE,
-        .user_pins = _user_pins_F7SM_lightning,
-        .msel_pins = _msel_pins_std },
+        .user_pins = _user_pins_F7SM_lightning },
     [F7SM_v2] = {
         .hse_mhz   = 8,
-        .user_pins = _user_pins_F7SM_v2,
-        .msel_pins = _msel_pins_std },
+        .user_pins = _user_pins_F7SM_v2 },
     [F7SM_ant_goffart_f7_plus_v2] = {
         .hse_mhz   = 8,
-        .user_pins = _user_pins_F7SM_ant_goffart_f7_plus_v2,
-        .msel_pins = _msel_pins_std },
+        .user_pins = _user_pins_F7SM_ant_goffart_f7_plus_v2 },
     [F7SM_lightning_plus] = {
         .hse_mhz   = 16,
         .hse_byp   = TRUE,
         .hs_usb    = TRUE,
         .flippy    = TRUE,
-        .user_pins = _user_pins_F7SM_lightning_plus,
-        .msel_pins = _msel_pins_std },
+        .user_pins = _user_pins_F7SM_lightning_plus },
     [F7SM_slim] = {
         .hse_mhz   = 16,
         .hse_byp   = TRUE,
-        .user_pins = _user_pins_F7SM_slim,
-        .msel_pins = _msel_pins_f7_slim },
+        .user_pins = _user_pins_F7SM_slim },
     [F7SM_v3] = {
         .hse_mhz   = 8,
         .flippy    = TRUE,
-        .user_pins = _user_pins_F7SM_v3,
-        .msel_pins = _msel_pins_std },
+        .user_pins = _user_pins_F7SM_v3 }
 };
 
 /* Blink the activity LED to indicate fatal error. */
@@ -179,7 +195,6 @@ static void mcu_board_init(void)
         [_I] = 0xffff, /* PI0-15 */
     };
     uint32_t ahb1enr = rcc->ahb1enr;
-    const struct pin_mapping *mpin;
     const struct pin_mapping *upin;
 
     /* Enable all GPIO bank register clocks to configure unused pins. */
@@ -193,10 +208,6 @@ static void mcu_board_init(void)
                      RCC_AHB1ENR_GPIOHEN |
                      RCC_AHB1ENR_GPIOIEN);
     peripheral_clock_delay();
-
-    /* MSEL pins: do not default these pins to pull-up mode. */
-    for (mpin = board_config->msel_pins; mpin->pin_id != 0; mpin++)
-        pu[mpin->gpio_bank] &= ~(1u << mpin->gpio_pin);
 
     /* Keep clock enabled for all banks containing user-modifiable pins. 
      * Also do not default these pins to pull-up mode. */

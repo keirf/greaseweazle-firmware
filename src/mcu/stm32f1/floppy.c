@@ -59,7 +59,6 @@ static unsigned int U_BUF_SZ;
 
 static void floppy_mcu_init(void)
 {
-    const struct pin_mapping *mpin;
     const struct pin_mapping *upin;
     unsigned int avail_kb;
 
@@ -99,12 +98,6 @@ static void floppy_mcu_init(void)
     /* Configure the standard output types. */
     GPO_bus = upin->push_pull ? GPO_bus_pp : GPO_bus_od;
     AFO_bus = upin->push_pull ? AFO_bus_pp : AFO_bus_od;
-
-    /* Configure SELECT/MOTOR lines. */
-    for (mpin = board_config->msel_pins; mpin->pin_id != 0; mpin++) {
-        gpio_configure_pin(gpio_from_id(mpin->gpio_bank), mpin->gpio_pin,
-                           GPO_bus);
-    }
 
     /* Set up EXTI mapping for INDEX: PB[15:0] -> EXT[15:0] */
     afio->exticr1 = afio->exticr2 = afio->exticr3 = afio->exticr4 = 0x1111;

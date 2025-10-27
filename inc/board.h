@@ -15,5 +15,4 @@ struct board_config {
     bool_t hs_usb;
     bool_t flippy;
     const struct pin_mapping *user_pins;
-    const struct pin_mapping *msel_pins;
 };

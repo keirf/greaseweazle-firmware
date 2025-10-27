@@ -86,7 +86,6 @@ static void fpec_extend_sram(bool_t extend)
 
 static void floppy_mcu_init(void)
 {
-    const struct pin_mapping *mpin;
     const struct pin_mapping *upin;
     unsigned int avail_kb;
 
@@ -115,12 +114,6 @@ static void floppy_mcu_init(void)
     /* Configure user-modifiable pins. */
     for (upin = board_config->user_pins; upin->pin_id != 0; upin++) {
         gpio_configure_pin(gpio_from_id(upin->gpio_bank), upin->gpio_pin,
-                           GPO_bus);
-    }
-
-    /* Configure SELECT/MOTOR lines. */
-    for (mpin = board_config->msel_pins; mpin->pin_id != 0; mpin++) {
-        gpio_configure_pin(gpio_from_id(mpin->gpio_bank), mpin->gpio_pin,
                            GPO_bus);
     }
 

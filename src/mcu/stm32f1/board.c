@@ -12,47 +12,42 @@
 #define gpio_led gpioc
 #define pin_led 13
 
-const static struct pin_mapping _msel_pins_std[] = {
-    { 10, _B, 11 },
-    { 14, _B, 10 },
-    {  0,  0,  0 }
-};
-
-const static struct pin_mapping _msel_pins_f1_plus[] = {
-    { 10, _B, 11 },
-    { 12, _B,  0 },
-    { 14, _B, 10 },
-    { 16, _B,  1 },
-    {  0,  0,  0 }
-};
-
 const static struct pin_mapping _user_pins_std[] = {
-    { 2, _B,  9, _OD },
-    { 0,  0,  0, _OD } };
+    {  2, _B,  9, _OD },
+    { 10, _B, 11, _OD },
+    { 14, _B, 10, _OD },
+    {  0,  0,  0, _OD } };
+
 const static struct pin_mapping _user_pins_f1_plus[] = {
-    { 2, _B,  9, _PP },
-    { 4, _A,  3, _PP },
-    { 6, _A,  1, _PP },
-    { 0,  0,  0, _PP } };
+    {  2, _B,  9, _PP },
+    {  4, _A,  3, _PP },
+    {  6, _A,  1, _PP },
+    { 10, _B, 11, _PP },
+    { 12, _B,  0, _PP },
+    { 14, _B, 10, _PP },
+    { 16, _B,  1, _PP },
+    {  0,  0,  0, _PP } };
+
 const static struct pin_mapping _user_pins_f1_plus_unbuffered[] = {
-    { 2, _B,  9, _OD },
-    { 4, _A,  3, _OD },
-    { 6, _A,  1, _OD },
-    { 0,  0,  0, _OD } };
+    {  2, _B,  9, _OD },
+    {  4, _A,  3, _OD },
+    {  6, _A,  1, _OD },
+    { 10, _B, 11, _OD },
+    { 12, _B,  0, _OD },
+    { 14, _B, 10, _OD },
+    { 16, _B,  1, _OD },
+    {  0,  0,  0, _OD } };
 
 const static struct board_config _board_config[] = {
     [F1SM_basic] = {
         .flippy    = FALSE,
-        .user_pins = _user_pins_std,
-        .msel_pins = _msel_pins_std },
+        .user_pins = _user_pins_std },
     [F1SM_plus] = {
         .flippy    = TRUE,
-        .user_pins = _user_pins_f1_plus,
-        .msel_pins = _msel_pins_f1_plus },
+        .user_pins = _user_pins_f1_plus },
     [F1SM_plus_unbuffered] = {
         .flippy    = TRUE,
-        .user_pins = _user_pins_f1_plus_unbuffered,
-        .msel_pins = _msel_pins_f1_plus }
+        .user_pins = _user_pins_f1_plus_unbuffered }
 };
 
 /* Blink the activity LED to indicate fatal error. */
@@ -121,14 +116,9 @@ static void mcu_board_init(void)
         [_B] = 0x0e27, /* PB0-2,5,9-11 */
         [_C] = 0xffff, /* PC0-15 */
     };
-    const struct pin_mapping *mpin;
     const struct pin_mapping *upin;
 
     identify_board_config();
-
-    /* MSEL pins: do not default these pins to pull-up mode. */
-    for (mpin = board_config->msel_pins; mpin->pin_id != 0; mpin++)
-        pu[mpin->gpio_bank] &= ~(1u << mpin->gpio_pin);
 
     /* User pins: do not default these pins to pull-up mode. */
     for (upin = board_config->user_pins; upin->pin_id != 0; upin++)

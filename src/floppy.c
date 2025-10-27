@@ -201,7 +201,7 @@ static void drive_deselect(void)
         break;
     }
 
-    rc = write_mapped_pin(board_config->msel_pins, pin, O_FALSE);
+    rc = write_mapped_pin(board_config->user_pins, pin, O_FALSE);
     ASSERT(rc == ACK_OKAY);
 
     unit_nr = -1;
@@ -237,7 +237,7 @@ static uint8_t drive_select(uint8_t nr)
         return ACK_NO_BUS;
     }
 
-    rc = write_mapped_pin(board_config->msel_pins, pin, O_TRUE);
+    rc = write_mapped_pin(board_config->user_pins, pin, O_TRUE);
     if (rc != ACK_OKAY)
         return ACK_BAD_UNIT;
 
@@ -276,7 +276,7 @@ static uint8_t drive_motor(uint8_t nr, bool_t on)
         return ACK_NO_BUS;
     }
 
-    rc = write_mapped_pin(board_config->msel_pins, pin, on ? O_TRUE : O_FALSE);
+    rc = write_mapped_pin(board_config->user_pins, pin, on ? O_TRUE : O_FALSE);
     if (rc != ACK_OKAY)
         return ACK_BAD_UNIT;
 

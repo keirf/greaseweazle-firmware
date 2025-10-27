@@ -23,8 +23,6 @@ static void testmode_set_pin(unsigned int pin, bool_t level)
     int rc;
     rc = write_mapped_pin(testmode_out_pins, pin, level);
     if (rc != ACK_OKAY)
-        rc = write_mapped_pin(board_config->msel_pins, pin, level);
-    if (rc != ACK_OKAY)
         rc = write_mapped_pin(board_config->user_pins, pin, level);
 }
 

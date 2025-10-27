@@ -23,18 +23,14 @@ const static struct core_floppy_pins _core_floppy_pins_v4 = {
     .head   = 5  /* PB5 */
 };
 
-const static struct pin_mapping _msel_pins_v4[] = {
-    { 10, _A,  3 },
-    { 12, _B,  9 },
-    { 14, _A,  4 },
-    { 16, _A,  1 },
-    {  0,  0,  0 }
-};
-
 const static struct pin_mapping _user_pins_v4[] = {
     {  2, _A,  6 },
     {  4, _A,  5 },
     {  6, _A,  7 },
+    { 10, _A,  3 },
+    { 12, _B,  9 },
+    { 14, _A,  4 },
+    { 16, _A,  1 },
     {  0,  0,  0 }
 };
 
@@ -49,13 +45,9 @@ const static struct core_floppy_pins _core_floppy_pins_v4_slim = {
     .head   = 9  /* PB9 */
 };
 
-const static struct pin_mapping _msel_pins_v4_slim[] = {
+const static struct pin_mapping _user_pins_v4_slim[] = {
     { 10, _B,  4 },
     { 14, _B,  1 },
-    {  0,  0,  0 }
-};
-
-const static struct pin_mapping _user_pins_v4_slim[] = {
     {  0,  0,  0 }
 };
 
@@ -63,18 +55,15 @@ const static struct board_config _board_config[] = {
     [F4SM_v4] = {
         .hse_mhz   = 8,
         .flippy    = TRUE,
-        .user_pins = _user_pins_v4,
-        .msel_pins = _msel_pins_v4 },
+        .user_pins = _user_pins_v4 },
     [F4SM_v4_slim] = {
         .hse_mhz   = 16,
         .hse_byp   = TRUE,
-        .user_pins = _user_pins_v4_slim,
-        .msel_pins = _msel_pins_v4_slim },
+        .user_pins = _user_pins_v4_slim },
     [F4SM_v4_1] = {
         .hse_mhz   = 8,
         .flippy    = TRUE,
-        .user_pins = _user_pins_v4,
-        .msel_pins = _msel_pins_v4 },
+        .user_pins = _user_pins_v4 }
 };
 
 const struct core_floppy_pins *core_floppy_pins;
