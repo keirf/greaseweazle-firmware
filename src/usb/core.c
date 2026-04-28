@@ -91,6 +91,14 @@ static bool_t handle_control_request(void)
 
         handled = cdc_acm_set_configuration();
 
+    } else if ((req->bmRequestType == 0x02)
+               && (req->bRequest == CLEAR_FEATURE)
+               && (req->wValue == 0x0000)) {
+
+        /* CLEAR_FEATURE(ENDPOINT_HALT): Required by USB spec.
+         * Reset data toggle and double-buffer ring state. */
+        usb_clear_halt(req->wIndex);
+
     } else if ((req->bmRequestType&0x7f) == 0x21) {
 
         handled = cdc_acm_handle_class_request();

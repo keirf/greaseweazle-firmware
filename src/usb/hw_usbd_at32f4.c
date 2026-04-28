@@ -216,6 +216,62 @@ static void usbd_stall(uint8_t ep)
     usb->epr[ep] = epr;
 }
 
+static void usbd_clear_halt(uint8_t epnr)
+{
+    bool_t in = !!(epnr & 0x80);
+    struct ep *ep;
+    volatile struct usb_bufd *bd;
+    uint16_t old_epr, new_epr;
+    uint32_t oldpri;
+
+    epnr &= 0x7f;
+    ep = &eps[epnr];
+    bd = &usb_bufd[epnr];
+
+    old_epr = usb->epr[epnr];
+    new_epr = old_epr & 0x070f; /* preserve rw & t fields */
+
+    if (ep->is_dblbuf) {
+
+        /* Reset double-buffer ring and endpoint state to match
+         * usbd_configure_ep() initialisation. Buffer addresses
+         * (bd->addr_0/1) are not changed. */
+        oldpri = IRQ_save(USB_IRQ_PRI);
+        ep->db.bufc = ep->db.bufp = ep->db.tx_hw_slots = 0;
+        if (in) {
+            bd->count_0 = bd->count_1 = 0;
+            /* TX: Clears SW_BUF. */
+            new_epr |= old_epr & 0x4000;
+            /* TX: Clears data toggle and sets status to VALID. */
+            new_epr |= (old_epr & 0x0070)
+                ^ USB_EPR_STAT_TX(USB_STAT_VALID);
+            ep->db.kick = TRUE;
+        } else {
+            bd->count_0 = bd->count_1 = 0x8400; /* USB_FS_MPS */
+            /* RX: Sets SW_BUF. */
+            new_epr |= (old_epr & 0x0040) ^ 0x0040;
+            ep->db.kick = FALSE;
+            /* RX: Clears data toggle and sets status to VALID. */
+            new_epr |= (old_epr & 0x7000)
+                ^ USB_EPR_STAT_RX(USB_STAT_VALID);
+        }
+        barrier();
+        usb->epr[epnr] = new_epr;
+        IRQ_restore(oldpri);
+
+    } else {
+
+        /* Standard endpoint: clear data toggle only. */
+        new_epr |= 0x8080; /* preserve rc_w0 fields */
+        if (in)
+            new_epr |= old_epr & USB_EPR_DTOG_TX;
+        else
+            new_epr |= old_epr & USB_EPR_DTOG_RX;
+        usb->epr[epnr] = new_epr;
+
+    }
+}
+
 static void usbd_configure_ep(uint8_t epnr, uint8_t type, uint32_t size)
 {
     static const uint8_t types[] = {
@@ -526,7 +582,8 @@ const struct usb_driver usbd = {
     .ep_tx_ready = usbd_ep_tx_ready,
     .read = usbd_read,
     .write = usbd_write,
-    .stall = usbd_stall
+    .stall = usbd_stall,
+    .clear_halt = usbd_clear_halt
 };
 
 /*

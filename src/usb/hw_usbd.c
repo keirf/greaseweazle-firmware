@@ -191,6 +191,23 @@ static void usbd_stall(uint8_t ep)
     usb->epr[ep] = epr;
 }
 
+static void usbd_clear_halt(uint8_t epnr)
+{
+    bool_t in = !!(epnr & 0x80);
+    uint16_t epr, val;
+    epnr &= 0x7f;
+    epr = usb->epr[epnr];
+    val = epr & 0x070f; /* preserve R/W: EA, EP_TYPE, EP_KIND */
+    val |= 0x8080;      /* preserve rc_w0: CTR_TX, CTR_RX */
+    /* STAT written as 0: no toggle, unchanged.
+     * Write current DTOG value to toggle it to 0 if set. */
+    if (in)
+        val |= epr & USB_EPR_DTOG_TX;
+    else
+        val |= epr & USB_EPR_DTOG_RX;
+    usb->epr[epnr] = val;
+}
+
 static void usbd_configure_ep(uint8_t ep, uint8_t type, uint32_t size)
 {
     static const uint8_t types[] = {
@@ -393,7 +410,8 @@ const struct usb_driver usbd = {
     .ep_tx_ready = usbd_ep_tx_ready,
     .read = usbd_read,
     .write = usbd_write,
-    .stall = usbd_stall
+    .stall = usbd_stall,
+    .clear_halt = usbd_clear_halt
 };
 
 /*
