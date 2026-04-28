@@ -240,11 +240,16 @@ static void dwc_otg_write(uint8_t epnr, const void *buf, uint32_t len)
 
 static void dwc_otg_stall(uint8_t epnr)
 {
-    otg_diep[epnr].ctl |= OTG_DIEPCTL_STALL;
-    otg_doep[epnr].ctl |= OTG_DOEPCTL_STALL;
+    bool_t in = !!(epnr & 0x80);
+    epnr &= 0x7f;
+    if (in) {
+        otg_diep[epnr].ctl |= OTG_DIEPCTL_STALL;
+    } else {
+        otg_doep[epnr].ctl |= OTG_DOEPCTL_STALL;
+    }
 }
 
-static void dwc_otg_clear_halt(uint8_t epnr)
+static void dwc_otg_clear_stall(uint8_t epnr)
 {
     bool_t in = !!(epnr & 0x80);
     epnr &= 0x7f;
@@ -490,7 +495,7 @@ const struct usb_driver dwc_otg = {
     .read = dwc_otg_read,
     .write = dwc_otg_write,
     .stall = dwc_otg_stall,
-    .clear_halt = dwc_otg_clear_halt
+    .clear_stall = dwc_otg_clear_stall
 };
 
 /*

@@ -97,7 +97,7 @@ static bool_t handle_control_request(void)
 
         /* CLEAR_FEATURE(ENDPOINT_HALT): Required by USB spec.
          * Reset data toggle and double-buffer ring state. */
-        usb_clear_halt(req->wIndex);
+        usb_clear_stall(req->wIndex);
 
     } else if ((req->bmRequestType&0x7f) == 0x21) {
 
@@ -149,6 +149,12 @@ static void usb_write_ep0(void)
     }
 }
 
+static void usb_ctrl_stall(void)
+{
+    usb_stall(0x00);
+    usb_stall(0x80);
+}
+
 void handle_rx_ep0(bool_t is_setup)
 {
     bool_t ready = FALSE;
@@ -165,7 +171,7 @@ void handle_rx_ep0(bool_t is_setup)
     } else if (ep0.data_len < 0) {
 
         /* Unexpected Transaction */
-        usb_stall(0);
+        usb_ctrl_stall();
         usb_read(ep, NULL, 0);
 
     } else if (ep0_data_out()) {
@@ -199,7 +205,7 @@ void handle_rx_ep0(bool_t is_setup)
     if (!handle_control_request()) {
 
         /* Unhandled Control Transfer: STALL */
-        usb_stall(0);
+        usb_ctrl_stall();
         ep0.data_len = -1; /* Complete */
 
     } else if (ep0_data_in()) {

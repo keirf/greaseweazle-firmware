@@ -86,9 +86,9 @@ void usb_stall(uint8_t epnr)
     drv->stall(epnr);
 }
 
-void usb_clear_halt(uint8_t epnr)
+void usb_clear_stall(uint8_t epnr)
 {
-    drv->clear_halt(epnr);
+    drv->clear_stall(epnr);
 }
 
 void usb_configure_ep(uint8_t epnr, uint8_t type, uint32_t size)

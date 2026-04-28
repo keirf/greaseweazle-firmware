@@ -78,8 +78,8 @@ void handle_tx_ep0(void);
 /* USB Hardware */
 enum { EPT_CONTROL=0, EPT_ISO, EPT_BULK, EPT_INTERRUPT, EPT_DBLBUF };
 void usb_configure_ep(uint8_t ep, uint8_t type, uint32_t size);
-void usb_stall(uint8_t ep);
-void usb_clear_halt(uint8_t ep);
+void usb_stall(uint8_t epnr);
+void usb_clear_stall(uint8_t epnr);
 void usb_setaddr(uint8_t addr);
 void hw_usb_init(void);
 void hw_usb_deinit(void);
@@ -101,7 +101,7 @@ struct usb_driver {
     void (*read)(uint8_t epnr, void *buf, uint32_t len);
     void (*write)(uint8_t epnr, const void *buf, uint32_t len);
     void (*stall)(uint8_t epnr);
-    void (*clear_halt)(uint8_t epnr);
+    void (*clear_stall)(uint8_t epnr);
 };
 
 extern const struct usb_driver dwc_otg;
