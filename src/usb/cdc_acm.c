@@ -78,7 +78,11 @@ bool_t cdc_acm_handle_class_request(void)
     }
 
     case CDC_SET_CONTROL_LINE_STATE:
-        /* wValue = DTR/RTS. We ignore them and return success. */
+        /* wValue[0]: D0=DTR, D1=RTS.
+         * When DTR drops the host has closed the port. Reset comms
+         * so we are in a clean state when it is reopened. */
+        if (!(req->wValue & 1))
+            usb_cdc_acm_ops.configure();
         break;
 
     case CDC_SEND_BREAK:

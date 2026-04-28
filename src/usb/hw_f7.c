@@ -148,6 +148,11 @@ void usb_stall(uint8_t epnr)
     dwc_otg.stall(epnr);
 }
 
+void usb_clear_stall(uint8_t epnr)
+{
+    dwc_otg.clear_stall(epnr);
+}
+
 void usb_configure_ep(uint8_t epnr, uint8_t type, uint32_t size)
 {
     dwc_otg.configure_ep(epnr, type, size);
